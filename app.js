@@ -16,7 +16,7 @@
 
   const DEFAULT_MIX = {
     claude: { main: "claude-sonnet-5-5|high", hard: "claude-opus-5-5|xhigh", h: 20 },
-    openai: { main: "gpt-6-sol|xhigh", hard: "gpt-6-astra|max", h: 20 },
+    openai: { main: "gpt-6-1-sol|xhigh", hard: "gpt-6-astra|max", h: 20 },
   };
   const DEFAULTS = {
     claude: SUBS.claude.weeklyValue,
@@ -26,7 +26,7 @@
     olimit: SUBS.openai.limitScale * 100,
     size: 2, hidden: [], bar: 48, preset: "balanced",
     mix: DEFAULT_MIX,
-    cmp: { a: "claude-opus-5-5|medium", b: "gpt-6-sol|max" },
+    cmp: { a: "claude-opus-5-5|medium", b: "gpt-6-1-sol|xhigh" },
   };
   const PRESETS = [
     { id: "volume", name: "Volume first", desc: "Lots of small, routine tasks", bar: 36, size: 2,
@@ -38,7 +38,7 @@
       mix: { claude: { main: "claude-opus-5-5|medium", hard: "claude-opus-5-5|xhigh", h: 30 }, openai: { main: "gpt-6-astra|medium", hard: "gpt-6-astra|max", h: 30 } } },
   ];
 
-  const STORE = "wsiwi-state-v4";
+  const STORE = "wsiwi-state-v5";
   let state = structuredClone(DEFAULTS);
   try {
     const saved = JSON.parse(localStorage.getItem(STORE) || "null");
@@ -102,7 +102,7 @@
   // Full-week $ value if the whole limit went to this model, and the share of the limit it may use.
   function weekValue(m) {
     if (m.sub === "claude") return state.claude;
-    return (m.id === "gpt-6-sol" ? state.sol : state.astra) * state.olimit / 100;
+    return (m.id === "gpt-6-astra" ? state.astra : state.sol) * state.olimit / 100;
   }
   const limitCap = (m) => m.id === "claude-fable-5-1" ? state.fable / 100 : 1;
   const size = () => SIZES[state.size];
@@ -682,7 +682,7 @@
     $("#rSize").value = state.size;
     $("#sizeOut").textContent = size() + "×";
     const cut = state.olimit === 100 ? "at full limits" : `at ${Math.round(state.olimit)}% limits`;
-    $("#solHint").textContent = `Before the cut. Effective $${fmt(state.sol * state.olimit / 100)}/week ${cut}.`;
+    $("#solHint").textContent = `GPT-6 and 6.1 Sol, before the cut. Effective $${fmt(state.sol * state.olimit / 100)}/week ${cut}.`;
     $("#astraHint").textContent = `Before the cut. Effective $${fmt(state.astra * state.olimit / 100)}/week ${cut}.`;
     $("#olimHint").textContent = state.olimit === 100 ? "No cut: full Pro 20x limits." : state.olimit === 50 ? "Limits cut in half. Drag to 100% to compare." : `Limits at ${Math.round(state.olimit)}% of the original.`;
     $("#fableHint").textContent = `Fable alone gets ${Math.round(state.fable)}% of $${fmt(state.claude)} = $${fmt(state.claude * state.fable / 100)}/week.`;

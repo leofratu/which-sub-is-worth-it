@@ -18,7 +18,7 @@ Open `index.html` in a browser, or serve the folder with GitHub Pages. There is 
 | Plan | Weekly API value (estimate) | Models |
 |---|---|---|
 | Claude Max 20x | ~$2,200–2,300 | Claude Opus 5.5, Claude Sonnet 5.5 at full value. Claude Fable 5.1 at the same rate, but it can use only 50% of the weekly limits (~$1,125). |
-| OpenAI Pro 20x | ~$1,300 on GPT-6 Sol, ~$1,400 on GPT-6 Astra at full limits. **Current scenario: limits cut in half**, so ~$650 / ~$700. | Limits are weighted differently per model. The "OpenAI limits" slider sets the cut. |
+| OpenAI Pro 20x | ~$1,300 on GPT-6 Sol and GPT-6.1 Sol (same pricing), ~$1,400 on GPT-6 Astra at full limits. **Current scenario: limits cut in half**, so ~$650 / ~$700. | Limits are weighted differently per model. The "OpenAI limits" slider sets the cut. |
 
 Each model is tracked at low, medium, high, xhigh and max effort. For each one the page records the AA Intelligence Index (v4.3.2), cost per task, output speed and list price.
 
@@ -38,16 +38,16 @@ Code: `index.html` (layout and styles), `app.js` (rendering and interaction), `d
 
 ## Headline (snapshot 2026-09-29, OpenAI Pro 20x limits cut in half)
 
-- Claude Max 20x finishes more tasks at every quality bar from 34 to 58.
-- Sol keeps its low cost per task, but half the limits erase its volume lead. At a minimum score of 34, Sol low (~5,000 tasks/week) now trails Sonnet 5.5 low (~5,488).
-- At a score of 48 or higher, Opus 5.5 medium (~1,679) finishes 2.74× as many tasks as Sol max (~613). At 53 or higher, Opus 5.5 high finishes 5.76× as many as Astra max.
-- Before the cut (drag the slider to 100%), Sol won at scores 34, 37–40 and 43–44, and Claude won everywhere else.
+- Claude Max 20x finishes more tasks at every quality bar from 34 to 58, but GPT-6.1 Sol makes it close.
+- GPT-6.1 Sol xhigh reaches a score of 51 at $0.39 per task. At scores 45–51 it finishes ~1,667 tasks/week against Opus 5.5 medium's ~1,679, a lead of about 1%.
+- At a score of 52, Opus 5.5 high (~1,236) beats GPT-6.1 Sol max (~903) by 1.37×. At 53 or higher, only Astra max is left on OpenAI, and Claude leads 5.76×.
+- At full OpenAI limits (drag the slider to 100%), OpenAI wins at scores 34, 37–40 and 43–52, up to 1.99× at 48–51. Claude wins at 35–36, 41–42 and 53+.
 
 ## Contributing
 
 All numbers live in [`data.js`](data.js), with an Artificial Analysis source link per row. To fix a value, fill a gap, or add a model or plan, edit that file and open a PR with a source.
 
-Known gaps: Sonnet 5.5 xhigh (all metrics), Fable 5.1 medium cost, GPT-6 Astra xhigh cost, and several output speeds.
+Known gaps: Sonnet 5.5 xhigh (all metrics), GPT-6.1 Sol medium and high (all metrics), Fable 5.1 medium cost, GPT-6 Astra xhigh cost, and several output speeds.
 
 ## Caveats
 

@@ -23,7 +23,7 @@ window.WSIWI_SUBS = {
     vendor: "OpenAI",
     // Different models draw on limits with different weights, so value differs per model.
     // These are the pre-cut estimates at full limits.
-    weeklyValueByModel: { "gpt-6-sol": 1300, "gpt-6-astra": 1400 },
+    weeklyValueByModel: { "gpt-6-sol": 1300, "gpt-6-1-sol": 1300, "gpt-6-astra": 1400 },
     // Scenario: Pro 20x limits cut in half. Effective value = weeklyValueByModel × limitScale.
     limitScale: 0.5,
   },
@@ -74,6 +74,19 @@ window.WSIWI_MODELS = [
       { effort: "high",   ii: 43, cost: 0.37, speed: 99.6, src: AA + "gpt-6-sol-high" },
       { effort: "xhigh",  ii: 44, cost: 0.53, speed: 83,   src: AA + "gpt-6-sol-xhigh" },
       { effort: "max",    ii: 48, cost: 1.06, speed: 89.8, src: AA + "gpt-6-sol" },
+    ],
+  },
+  {
+    // Same $2/$10 pricing as GPT-6 Sol, so it shares Sol's weekly value.
+    // AA has published low, xhigh and max; medium and high are pending.
+    id: "gpt-6-1-sol", name: "GPT-6.1 Sol", short: "GPT-6.1 Sol", sub: "openai",
+    shape: "diamond", price: { in: 2, out: 10 },
+    variants: [
+      { effort: "low",    ii: 34,   cost: 0.13, speed: 74,   src: AA + "gpt-6-1-sol-low" },
+      { effort: "medium", ii: null, cost: null, speed: null, src: AA + "gpt-6-1-sol-medium" },
+      { effort: "high",   ii: null, cost: null, speed: null, src: AA + "gpt-6-1-sol-high" },
+      { effort: "xhigh",  ii: 51,   cost: 0.39, speed: null, src: AA + "gpt-6-1-sol-xhigh" },
+      { effort: "max",    ii: 52,   cost: 0.72, speed: null, src: AA + "gpt-6-1-sol" },
     ],
   },
   {
