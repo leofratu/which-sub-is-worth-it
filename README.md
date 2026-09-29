@@ -18,7 +18,7 @@ Open `index.html` in a browser, or serve the folder with GitHub Pages. There is 
 | Plan | Weekly API value (estimate) | Models |
 |---|---|---|
 | Claude Max 20x | ~$2,200–2,300 | Claude Opus 5.5, Claude Sonnet 5.5 at full value. Claude Fable 5.1 at the same rate, but it can use only 50% of the weekly limits (~$1,125). |
-| OpenAI Pro 20x | ~$1,300 on GPT-6 Sol, ~$1,400 on GPT-6 Astra | Limits are weighted differently per model. |
+| OpenAI Pro 20x | ~$1,300 on GPT-6 Sol, ~$1,400 on GPT-6 Astra at full limits. **Current scenario: limits cut in half**, so ~$650 / ~$700. | Limits are weighted differently per model. The "OpenAI limits" slider sets the cut. |
 
 Each model is tracked at low, medium, high, xhigh and max effort. For each one the page records the AA Intelligence Index (v4.3.2), cost per task, output speed and list price.
 
@@ -36,12 +36,12 @@ Each model is tracked at low, medium, high, xhigh and max effort. For each one t
 
 Code: `index.html` (layout and styles), `app.js` (rendering and interaction), `data.js` (all numbers).
 
-## Headline (snapshot 2026-09-29)
+## Headline (snapshot 2026-09-29, OpenAI Pro 20x limits cut in half)
 
-- GPT-6 Sol is the volume king: Sol low finishes ~10,000 AA tasks/week on OpenAI Pro, and Sol max (index 48) ~1,226.
-- Claude Max 20x wins once you need index 45 or higher. Opus 5.5 medium (index 51) finishes ~1,679 tasks/week and Opus 5.5 high (index 54) ~1,236. That beats Sol max on both intelligence and volume.
-- Above index 53, only Claude has a model: Opus 5.5 xhigh/max or Sonnet 5.5 max.
-- Fable 5.1 is the least efficient here. It has high per-token prices and only half the budget.
+- Claude Max 20x finishes more tasks at every quality bar from 34 to 58.
+- Sol keeps its low cost per task, but half the limits erase its volume lead. At a minimum score of 34, Sol low (~5,000 tasks/week) now trails Sonnet 5.5 low (~5,488).
+- At a score of 48 or higher, Opus 5.5 medium (~1,679) finishes 2.74× as many tasks as Sol max (~613). At 53 or higher, Opus 5.5 high finishes 5.76× as many as Astra max.
+- Before the cut (drag the slider to 100%), Sol won at scores 34, 37–40 and 43–44, and Claude won everywhere else.
 
 ## Contributing
 

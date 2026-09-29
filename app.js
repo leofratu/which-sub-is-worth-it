@@ -23,6 +23,7 @@
     fable: SUBS.claude.fableShare * 100,
     sol: SUBS.openai.weeklyValueByModel["gpt-6-sol"],
     astra: SUBS.openai.weeklyValueByModel["gpt-6-astra"],
+    olimit: SUBS.openai.limitScale * 100,
     size: 2, hidden: [], bar: 48, preset: "balanced",
     mix: DEFAULT_MIX,
     cmp: { a: "claude-opus-5-5|medium", b: "gpt-6-sol|max" },
@@ -37,7 +38,7 @@
       mix: { claude: { main: "claude-opus-5-5|medium", hard: "claude-opus-5-5|xhigh", h: 30 }, openai: { main: "gpt-6-astra|medium", hard: "gpt-6-astra|max", h: 30 } } },
   ];
 
-  const STORE = "wsiwi-state-v3";
+  const STORE = "wsiwi-state-v4";
   let state = structuredClone(DEFAULTS);
   try {
     const saved = JSON.parse(localStorage.getItem(STORE) || "null");
@@ -101,7 +102,7 @@
   // Full-week $ value if the whole limit went to this model, and the share of the limit it may use.
   function weekValue(m) {
     if (m.sub === "claude") return state.claude;
-    return m.id === "gpt-6-sol" ? state.sol : state.astra;
+    return (m.id === "gpt-6-sol" ? state.sol : state.astra) * state.olimit / 100;
   }
   const limitCap = (m) => m.id === "claude-fable-5-1" ? state.fable / 100 : 1;
   const size = () => SIZES[state.size];
@@ -671,6 +672,7 @@
     { k: "fable", r: "#rFable", n: "#nFable", max: 100 },
     { k: "sol", r: "#rSol", n: "#nSol", max: 5000 },
     { k: "astra", r: "#rAstra", n: "#nAstra", max: 5000 },
+    { k: "olimit", r: "#rOlim", n: "#nOlim", max: 100 },
   ];
   function syncInputs() {
     FIELDS.forEach((f) => {
@@ -679,6 +681,10 @@
     });
     $("#rSize").value = state.size;
     $("#sizeOut").textContent = size() + "×";
+    const cut = state.olimit === 100 ? "at full limits" : `at ${Math.round(state.olimit)}% limits`;
+    $("#solHint").textContent = `Before the cut. Effective $${fmt(state.sol * state.olimit / 100)}/week ${cut}.`;
+    $("#astraHint").textContent = `Before the cut. Effective $${fmt(state.astra * state.olimit / 100)}/week ${cut}.`;
+    $("#olimHint").textContent = state.olimit === 100 ? "No cut: full Pro 20x limits." : state.olimit === 50 ? "Limits cut in half. Drag to 100% to compare." : `Limits at ${Math.round(state.olimit)}% of the original.`;
     $("#fableHint").textContent = `Fable alone gets ${Math.round(state.fable)}% of $${fmt(state.claude)} = $${fmt(state.claude * state.fable / 100)}/week.`;
   }
   FIELDS.forEach((f) => {
@@ -690,7 +696,7 @@
     // on commit, snap any out-of-range or empty entry back to a valid value
     $(f.n).addEventListener("change", (e) => {
       const v = e.target.valueAsNumber;
-      state[f.k] = Number.isFinite(v) ? clamp(v, f.k === "fable" ? 0 : 1, f.max) : state[f.k];
+      state[f.k] = Number.isFinite(v) ? clamp(v, f.k === "fable" || f.k === "olimit" ? 0 : 1, f.max) : state[f.k];
       e.target.value = state[f.k]; save(); syncInputs(); render();
     });
   });

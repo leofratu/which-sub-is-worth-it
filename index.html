@@ -182,7 +182,7 @@ section { padding-block: 40px 0; }
 
 /* assumptions */
 .assume { display: grid; gap: 22px; }
-.assume-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 18px 22px; }
+.assume-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 290px), 1fr)); gap: 18px 22px; }
 .field-val input::-webkit-inner-spin-button, .field-val input::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
 .field { display: grid; grid-template-rows: auto auto auto; align-content: start; gap: 6px; font-size: 13px; color: var(--ink-2); min-width: 0; }
 .field-head { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; }
@@ -190,7 +190,7 @@ section { padding-block: 40px 0; }
 .field-val { display: flex; align-items: center; gap: 2px; font: 600 15px var(--f-mono); color: var(--ink); }
 .field-val input { font: inherit; width: 7.5ch; -moz-appearance: textfield; appearance: textfield; padding: 3px 6px; border: 1px solid var(--rule); border-radius: 4px; background: var(--bg); color: var(--ink); text-align: right; }
 .field input[type=range] { width: 100%; accent-color: var(--ink); margin: 0; }
-.field small { color: var(--ink-3); min-height: 2.6em; }
+.field small { color: var(--ink-3); min-height: 1.4em; }
 .assume-foot { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 12px; padding-top: 16px; border-top: 1px solid var(--rule); }
 .chips { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
 .chips-label { font-size: 13px; color: var(--ink-2); margin-right: 4px; }
@@ -310,7 +310,7 @@ footer { margin-top: 48px; padding-top: 18px; border-top: 1px solid var(--rule);
   <section id="assumptions">
     <div class="sec-head">
       <h2>Your assumptions</h2>
-      <p>What a full week of each plan is worth in list-price API dollars, how big your tasks are, and which models you would actually use. Every chart and rank on the page updates as you drag.</p>
+      <p>What a full week of each plan is worth in list-price API dollars (OpenAI Pro 20x limits are cut in half by default), how big your tasks are, and which models you would actually use. Every chart and rank on the page updates as you drag.</p>
     </div>
     <div class="panel assume">
       <div class="assume-grid">
@@ -321,22 +321,28 @@ footer { margin-top: 48px; padding-top: 18px; border-top: 1px solid var(--rule);
           <small>$/week on Opus 5.5 or Sonnet 5.5. Estimate $2,200–2,300.</small>
         </div>
         <div class="field">
-          <div class="field-head"><label for="rFable">Fable 5.1 cap</label>
+          <div class="field-head"><label for="rFable">Fable 5.1 limit cap</label>
             <span class="field-val"><input id="nFable" type="number" min="0" max="100" step="5" aria-label="Fable share of weekly limits in percent">%</span></div>
           <input id="rFable" type="range" min="0" max="100" step="5">
           <small id="fableHint"></small>
         </div>
         <div class="field">
-          <div class="field-head"><label for="rSol">Pro 20x · Sol</label>
+          <div class="field-head"><label for="rSol">OpenAI Pro 20x · Sol</label>
             <span class="field-val">$<input id="nSol" type="number" min="0" max="5000" step="50" aria-label="OpenAI Pro dollars per week on GPT-6 Sol"></span></div>
           <input id="rSol" type="range" min="500" max="3000" step="50">
-          <small>OpenAI $/week if the whole week goes to GPT-6 Sol.</small>
+          <small id="solHint"></small>
         </div>
         <div class="field">
-          <div class="field-head"><label for="rAstra">Pro 20x · Astra</label>
+          <div class="field-head"><label for="rAstra">OpenAI Pro 20x · Astra</label>
             <span class="field-val">$<input id="nAstra" type="number" min="0" max="5000" step="50" aria-label="OpenAI Pro dollars per week on GPT-6 Astra"></span></div>
           <input id="rAstra" type="range" min="500" max="3000" step="50">
-          <small>OpenAI $/week if the whole week goes to GPT-6 Astra.</small>
+          <small id="astraHint"></small>
+        </div>
+        <div class="field">
+          <div class="field-head"><label for="rOlim">OpenAI limits</label>
+            <span class="field-val"><input id="nOlim" type="number" min="0" max="100" step="5" aria-label="OpenAI Pro 20x limits as percent of original">%</span></div>
+          <input id="rOlim" type="range" min="0" max="100" step="5">
+          <small id="olimHint"></small>
         </div>
         <div class="field">
           <div class="field-head"><label for="rSize">Your task size</label>
@@ -367,7 +373,7 @@ footer { margin-top: 48px; padding-top: 18px; border-top: 1px solid var(--rule);
   <section id="crossover">
     <div class="sec-head">
       <h2>Does GPT-6 Sol's efficiency make up for it?</h2>
-      <p>The best tasks/week each plan can reach as you raise the minimum score. Sol's tiny cost per task wins on volume wherever it qualifies. Once the bar passes what Sol can score, Opus 5.5 at medium and high effort keeps Claude Max 20x ahead, and above 53 OpenAI has no model left.</p>
+      <p>The best tasks/week each plan can reach as you raise the minimum score. Sol has the lowest cost per task of any model, so it only loses on volume when OpenAI's limits are too small to use that advantage. With limits cut in half, Sol's advantage is gone: Claude Max 20x finishes more tasks at every score. Drag OpenAI limits to 100% to see the pre-cut picture, where Sol wins some low bands. Above 53, OpenAI has no model left.</p>
       <p class="bands" id="bands"></p>
     </div>
     <div class="panel">
