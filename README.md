@@ -25,10 +25,13 @@ Each model is tracked at low, medium, high, xhigh and max effort. For each one t
 ## What the page shows
 
 - **Quality-bar meter.** Pick a minimum Intelligence Index and see which plan finishes more tasks, and with which model and effort.
-- **Intelligence vs. tasks/week scatter.** Each model's effort curve, with the Pareto frontier ringed.
-- **"Does Sol's efficiency make up for it?"** The best tasks/week each plan can reach at every quality bar, plus a computed summary of which plan leads where.
-- **Sortable ledger.** Every model and effort ranked by tasks/week, score, $/task, speed, or index points per dollar.
-- **Editable assumptions.** Change the weekly values and everything recomputes.
+- **Your assumptions.** Sliders with exact-entry boxes for each plan's weekly value, the Fable limit cap and your task size (how many AA tasks one of your tasks is worth). Toggle models in or out and reset to defaults. Settings are remembered in your browser.
+- **Intelligence vs. tasks/week scatter.** Each model's effort curve, with the Pareto frontier ringed. Click a legend entry to hide a model. Click a point to use its score as your quality bar.
+- **"Does Sol's efficiency make up for it?"** The best tasks/week each plan can reach at every quality bar, with a computed summary of which plan leads where. Hover to compare, click to set the bar.
+- **Build your week.** Split one shared weekly budget between a routine model and a hard-task model per plan. It respects the Fable limit cap and shows how the weekly limit is used.
+- **Sortable ledger.** Every model and effort ranked by tasks/week, score, $/task, speed, or index points per dollar. Filter by plan; hover a row to find it on the scatter.
+
+Code: `index.html` (layout and styles), `app.js` (rendering and interaction), `data.js` (all numbers).
 
 ## Headline (snapshot 2026-09-29)
 
@@ -47,6 +50,6 @@ Known gaps: Sonnet 5.5 xhigh (all metrics), Fable 5.1 medium cost, GPT-6 Astra x
 
 - An AA task is a benchmark task, not your task. Compare ratios, not absolute counts.
 - Weekly plan values are estimates and change when vendors change limits.
-- Budgets are computed per model. A real week mixes models.
+- The rankings assume one model for the whole week. Use Build your week to split the budget.
 
 Not affiliated with Anthropic, OpenAI, or Artificial Analysis.

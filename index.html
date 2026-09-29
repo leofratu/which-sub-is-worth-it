@@ -88,6 +88,9 @@ section { padding-block: 40px 0; }
 .panel { background: var(--panel); border: 1px solid var(--rule); border-radius: 6px; padding: 16px; }
 .legend { display: flex; flex-wrap: wrap; gap: 6px 18px; font-size: 13px; color: var(--ink-2); margin-bottom: 8px; }
 .legend span { display: inline-flex; align-items: center; gap: 6px; }
+.legend button { all: unset; display: inline-flex; align-items: center; gap: 6px; cursor: pointer; }
+.legend button[aria-pressed="false"] { opacity: .4; text-decoration: line-through; }
+.legend button:focus-visible { outline: 2px solid var(--ink); outline-offset: 2px; }
 .chart { width: 100%; overflow-x: auto; }
 .chart svg { display: block; width: 100%; height: auto; min-width: 560px; }
 .chart svg text { font-family: var(--f-mono); fill: var(--ink-2); font-size: 11px; }
@@ -100,10 +103,50 @@ section { padding-block: 40px 0; }
 #tip .mono { font-size: 12px; }
 
 /* assumptions */
-.assume { display: grid; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); gap: 14px; }
-.field { display: grid; gap: 4px; font-size: 13px; color: var(--ink-2); }
-.field input { font: 600 16px var(--f-mono); padding: 8px 10px; border: 1px solid var(--rule); border-radius: 4px; background: var(--bg); color: var(--ink); width: 100%; }
-.field small { color: var(--ink-3); }
+.assume { display: grid; gap: 22px; }
+.assume-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 18px 22px; }
+.field-val input::-webkit-inner-spin-button, .field-val input::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
+.field { display: grid; grid-template-rows: auto auto auto; align-content: start; gap: 6px; font-size: 13px; color: var(--ink-2); min-width: 0; }
+.field-head { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; }
+.field-head label { font-weight: 600; color: var(--ink); }
+.field-val { display: flex; align-items: center; gap: 2px; font: 600 15px var(--f-mono); color: var(--ink); }
+.field-val input { font: inherit; width: 7.5ch; -moz-appearance: textfield; appearance: textfield; padding: 3px 6px; border: 1px solid var(--rule); border-radius: 4px; background: var(--bg); color: var(--ink); text-align: right; }
+.field input[type=range] { width: 100%; accent-color: var(--ink); margin: 0; }
+.field small { color: var(--ink-3); min-height: 2.6em; }
+.assume-foot { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 12px; padding-top: 16px; border-top: 1px solid var(--rule); }
+.chips { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+.chips-label { font-size: 13px; color: var(--ink-2); margin-right: 4px; }
+.chip { font: 600 13px var(--f-body); display: inline-flex; align-items: center; gap: 7px; padding: 6px 11px; border-radius: 99px; border: 1.5px solid var(--rule); background: var(--panel); color: var(--ink); cursor: pointer; }
+.chip[aria-pressed="false"] { color: var(--ink-3); text-decoration: line-through; border-style: dashed; }
+.chip[aria-pressed="false"] .dot { opacity: .35; }
+.chip:hover { border-color: var(--ink-3); }
+.chip .dot { margin-right: 0; }
+.btn { font: 600 13px var(--f-body); padding: 7px 14px; border-radius: 4px; border: 1.5px solid var(--ink); background: transparent; color: var(--ink); cursor: pointer; }
+.btn:hover { background: var(--ink); color: var(--panel); }
+
+/* week builder */
+.mix { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px; }
+.mix-card { background: var(--panel); border: 1px solid var(--rule); border-radius: 6px; padding: 18px; display: grid; gap: 14px; align-content: start; min-width: 0; }
+.mix-card h3 { margin: 0; font-size: 17px; display: flex; align-items: center; gap: 8px; }
+.mix-card label { display: grid; gap: 4px; font-size: 13px; color: var(--ink-2); }
+.mix-card select { font: 500 14px var(--f-body); padding: 7px 8px; border: 1px solid var(--rule); border-radius: 4px; background: var(--bg); color: var(--ink); width: 100%; }
+.mix-card input[type=range] { width: 100%; accent-color: var(--ink); }
+.mix-total { font: 700 clamp(30px, 5vw, 40px) var(--f-mono); line-height: 1; letter-spacing: -.02em; }
+.mix-total small { font: 400 14px var(--f-body); color: var(--ink-2); letter-spacing: 0; margin-left: 6px; }
+.mix-split { display: grid; grid-template-columns: 1fr auto; gap: 4px 12px; font-size: 14px; color: var(--ink-2); }
+.mix-split b { font-family: var(--f-mono); color: var(--ink); text-align: right; }
+.stack { display: flex; height: 14px; border-radius: 3px; overflow: hidden; background: var(--grid); gap: 2px; }
+.stack div { height: 100%; }
+.stack .unused { background: repeating-linear-gradient(135deg, var(--grid) 0 4px, var(--rule) 4px 6px); }
+.mix-note { font-size: 13px; color: var(--ink-3); margin: 0; min-height: 1.3em; }
+.mix-verdict { margin: 18px 0 0; font-size: 17px; }
+
+/* linked highlight */
+#scatter svg.focus g[data-key]:not(.on) { opacity: .2; }
+#scatter svg g[data-key] { cursor: pointer; transition: opacity .12s; }
+tr[data-key].on td { background: var(--grid); }
+tr.off td { opacity: .45; }
+.filters { margin-bottom: 12px; }
 
 /* table */
 .table-wrap { overflow-x: auto; }
@@ -130,7 +173,7 @@ footer { margin-top: 48px; padding-top: 18px; border-top: 1px solid var(--rule);
   .bar-row { grid-template-columns: 1fr; }
   .hero { padding-block: 32px 20px; }
 }
-@media (prefers-reduced-motion: reduce) { .fill { transition: none; } }
+@media (prefers-reduced-motion: reduce) { .fill, #scatter svg g[data-key] { transition: none; } }
 </style>
 </head>
 <body>
@@ -159,10 +202,55 @@ footer { margin-top: 48px; padding-top: 18px; border-top: 1px solid var(--rule);
     <p class="verdict-line" id="verdictLine"></p>
   </div>
 
+  <section id="assumptions">
+    <div class="sec-head">
+      <h2>Your assumptions</h2>
+      <p>What a full week of each plan is worth in list-price API dollars, how big your tasks are, and which models you would actually use. Every chart and rank on the page updates as you drag.</p>
+    </div>
+    <div class="panel assume">
+      <div class="assume-grid">
+        <div class="field">
+          <div class="field-head"><label for="rClaude">Claude Max 20x</label>
+            <span class="field-val">$<input id="nClaude" type="number" min="0" max="5000" step="50" aria-label="Claude Max 20x dollars per week"></span></div>
+          <input id="rClaude" type="range" min="1000" max="4000" step="50">
+          <small>$/week on Opus 5.5 or Sonnet 5.5. Estimate $2,200–2,300.</small>
+        </div>
+        <div class="field">
+          <div class="field-head"><label for="rFable">Fable 5.1 cap</label>
+            <span class="field-val"><input id="nFable" type="number" min="0" max="100" step="5" aria-label="Fable share of weekly limits in percent">%</span></div>
+          <input id="rFable" type="range" min="0" max="100" step="5">
+          <small id="fableHint"></small>
+        </div>
+        <div class="field">
+          <div class="field-head"><label for="rSol">Pro 20x · Sol</label>
+            <span class="field-val">$<input id="nSol" type="number" min="0" max="5000" step="50" aria-label="OpenAI Pro dollars per week on GPT-6 Sol"></span></div>
+          <input id="rSol" type="range" min="500" max="3000" step="50">
+          <small>OpenAI $/week if the whole week goes to GPT-6 Sol.</small>
+        </div>
+        <div class="field">
+          <div class="field-head"><label for="rAstra">Pro 20x · Astra</label>
+            <span class="field-val">$<input id="nAstra" type="number" min="0" max="5000" step="50" aria-label="OpenAI Pro dollars per week on GPT-6 Astra"></span></div>
+          <input id="rAstra" type="range" min="500" max="3000" step="50">
+          <small>OpenAI $/week if the whole week goes to GPT-6 Astra.</small>
+        </div>
+        <div class="field">
+          <div class="field-head"><label for="rSize">Your task size</label>
+            <span class="field-val" id="sizeOut">1×</span></div>
+          <input id="rSize" type="range" min="0" max="8" step="1">
+          <small>How many AA benchmark tasks one of your tasks is worth.</small>
+        </div>
+      </div>
+      <div class="assume-foot">
+        <div class="chips" id="modelChips" role="group" aria-label="Models in play"></div>
+        <button class="btn" id="reset" type="button">Reset to defaults</button>
+      </div>
+    </div>
+  </section>
+
   <section>
     <div class="sec-head">
       <h2>Intelligence vs. tasks finished per week</h2>
-      <p>Each line is one model walked from low to max effort. Up means smarter, right means more work per week. Ringed points are on the frontier: no other option is both at least as smart and gets more done.</p>
+      <p>Each line is one model walked from low to max effort. Up means smarter, right means more work per week. Ringed points are on the frontier: no other option is both at least as smart and gets more done. Click a legend entry to hide a model. Click a point to make its score your quality bar.</p>
     </div>
     <div class="panel">
       <div class="legend" id="legend1"></div>
@@ -182,11 +270,21 @@ footer { margin-top: 48px; padding-top: 18px; border-top: 1px solid var(--rule);
     </div>
   </section>
 
+  <section id="week">
+    <div class="sec-head">
+      <h2>Build your week</h2>
+      <p>Nobody runs one model all week. Pick a workhorse for routine tasks and a heavier model for the hard ones. Both draw from the same weekly limit, so they share one budget.</p>
+    </div>
+    <div class="mix" id="mix"></div>
+    <p class="mix-verdict" id="mixVerdict"></p>
+  </section>
+
   <section>
     <div class="sec-head">
       <h2>Every model, every effort</h2>
-      <p>Sorted by tasks per week. Click a column to re-rank by score, cost, speed, or intelligence-per-dollar. Rows in grey are missing a published number and are left out of the charts.</p>
+      <p>Sorted by tasks per week. Click a column to re-rank by score, cost, speed, or intelligence-per-dollar. Hover a row to find it on the scatter. Faded rows are missing a published number or switched off in your assumptions.</p>
     </div>
+    <div class="filters chips" id="planFilter" role="group" aria-label="Filter by plan"></div>
     <div class="panel table-wrap">
       <table id="ledger">
         <thead><tr>
@@ -207,42 +305,20 @@ footer { margin-top: 48px; padding-top: 18px; border-top: 1px solid var(--rule);
     </div>
   </section>
 
-  <section>
-    <div class="sec-head">
-      <h2>Assumptions</h2>
-      <p>Weekly values are community estimates of the list-price API spend each plan covers at full use. Change them and every chart and rank updates.</p>
-    </div>
-    <div class="panel assume">
-      <label class="field" for="vClaude">Claude Max 20x · $/week (Opus, Sonnet)
-        <input id="vClaude" type="number" min="0" step="50" value="2250">
-        <small>Estimate range $2,200–2,300</small>
-      </label>
-      <label class="field" for="vFable">Fable 5.1 share of weekly limits · %
-        <input id="vFable" type="number" min="0" max="100" step="5" value="50">
-        <small>Same rate, capped at half the limits</small>
-      </label>
-      <label class="field" for="vSol">OpenAI Pro 20x · $/week on GPT-6 Sol
-        <input id="vSol" type="number" min="0" step="50" value="1300">
-      </label>
-      <label class="field" for="vAstra">OpenAI Pro 20x · $/week on GPT-6 Astra
-        <input id="vAstra" type="number" min="0" step="50" value="1400">
-      </label>
-    </div>
-  </section>
 
   <section>
     <div class="notes">
       <div>
         <h3>How the numbers work</h3>
         <p><span class="mono">tasks/week = weekly $ value ÷ $ per AA task</span>. Cost per task comes from Artificial Analysis running its 10-eval Intelligence Index at list API prices, so it already folds in how many tokens each model burns at each effort. A token-hungry model is expensive per task even at a low per-token price.</p>
-        <p>Fable 5.1 bills against Claude limits at the same API rate but can only use half the weekly limit, so its budget is half of the Claude figure.</p>
+        <p>Fable 5.1 bills against Claude limits at the same API rate but can use only part of the weekly limit (50% by default). On its own that caps it at that share of the Claude budget. In a mixed week the cap applies to the Fable part only.</p>
       </div>
       <div>
         <h3>Caveats</h3>
         <ul>
           <li>An AA task is a benchmark task, not your task. Use the ratios, not the absolute counts.</li>
           <li>Weekly plan values are estimates and move when vendors change limits.</li>
-          <li>Budgets are per model, not pooled. A real week mixes models.</li>
+          <li>Rankings assume one model for the whole week. Build your week splits one shared budget between two.</li>
           <li>Missing values: Sonnet 5.5 xhigh (all), Fable 5.1 medium and Astra xhigh cost, and several speeds. PRs with a source are welcome.</li>
         </ul>
       </div>
@@ -261,278 +337,6 @@ footer { margin-top: 48px; padding-top: 18px; border-top: 1px solid var(--rule);
 <div id="tip" role="tooltip"></div>
 
 <script src="data.js"></script>
-<script>
-(function () {
-  const SUBS = window.WSIWI_SUBS, MODELS = window.WSIWI_MODELS;
-  const $ = (s) => document.querySelector(s);
-  const NS = "http://www.w3.org/2000/svg";
-  const fmt = (n) => n == null ? "—" : Math.round(n).toLocaleString("en-US");
-  const money = (n) => n == null ? "—" : "$" + n.toFixed(2);
-  const subColor = (s) => `var(--${s})`;
-
-  const state = {
-    claude: SUBS.claude.weeklyValue, fable: SUBS.claude.fableShare * 100,
-    sol: SUBS.openai.weeklyValueByModel["gpt-6-sol"], astra: SUBS.openai.weeklyValueByModel["gpt-6-astra"],
-    bar: 48, sortK: "tasks", sortDir: -1,
-  };
-  try { const b = +localStorage.getItem("wsiwi-bar"); if (b >= 34 && b <= 58) state.bar = b; } catch (e) {}
-
-  function budget(m) {
-    if (m.sub === "claude") return m.id === "claude-fable-5-1" ? state.claude * state.fable / 100 : state.claude;
-    return m.id === "gpt-6-sol" ? state.sol : state.astra;
-  }
-
-  function rows() {
-    const out = [];
-    MODELS.forEach((m) => m.variants.forEach((v) => {
-      const b = budget(m);
-      const ok = v.ii != null && v.cost != null;
-      out.push({
-        m, v, sub: m.sub, subName: SUBS[m.sub].name, label: `${m.short} · ${v.effort}`,
-        ii: v.ii, cost: v.cost, speed: v.speed, price: m.price.out, budget: b, ok,
-        tasks: ok ? b / v.cost : null, ipd: ok ? v.ii / v.cost : null,
-      });
-    }));
-    const valid = out.filter((r) => r.ok);
-    valid.forEach((r) => {
-      r.frontier = !valid.some((o) => o !== r && o.ii >= r.ii && o.tasks >= r.tasks && (o.ii > r.ii || o.tasks > r.tasks));
-    });
-    return out;
-  }
-
-  function bestAt(rs, sub, bar) {
-    return rs.filter((r) => r.ok && r.sub === sub && r.ii >= bar).sort((a, b) => b.tasks - a.tasks)[0] || null;
-  }
-
-  // ---------- tooltip ----------
-  const tip = $("#tip");
-  function showTip(e, r) {
-    tip.innerHTML = `<b>${r.m.name} · ${r.v.effort}</b><br>${r.subName}<br>
-      <span class="mono">Index ${r.ii} · ${money(r.cost)}/task<br>${fmt(r.tasks)} tasks/wk · ${r.speed ?? "—"} tok/s</span>`;
-    tip.style.opacity = 1; moveTip(e);
-  }
-  function moveTip(e) {
-    const w = tip.offsetWidth, x = Math.min(e.clientX + 14, window.innerWidth - w - 8);
-    tip.style.left = x + "px"; tip.style.top = (e.clientY + 14) + "px";
-  }
-  function hideTip() { tip.style.opacity = 0; }
-
-  // ---------- svg helpers ----------
-  function el(tag, attrs, parent) {
-    const n = document.createElementNS(NS, tag);
-    for (const k in attrs) n.setAttribute(k, attrs[k]);
-    if (parent) parent.appendChild(n);
-    return n;
-  }
-  function marker(g, shape, x, y, r, fill) {
-    const a = { fill, stroke: "var(--panel)", "stroke-width": 2 };
-    if (shape === "square") return el("rect", { ...a, x: x - r, y: y - r, width: 2 * r, height: 2 * r, rx: 1.5 }, g);
-    if (shape === "diamond") return el("path", { ...a, d: `M${x},${y - r * 1.3}L${x + r * 1.3},${y}L${x},${y + r * 1.3}L${x - r * 1.3},${y}Z` }, g);
-    return el("circle", { ...a, cx: x, cy: y, r }, g);
-  }
-  const logScale = (d0, d1, r0, r1) => (v) => r0 + (Math.log10(v) - Math.log10(d0)) / (Math.log10(d1) - Math.log10(d0)) * (r1 - r0);
-  const linScale = (d0, d1, r0, r1) => (v) => r0 + (v - d0) / (d1 - d0) * (r1 - r0);
-  const LOG_TICKS = [100, 200, 500, 1000, 2000, 5000, 10000, 20000];
-  const tk = (v) => v >= 1000 ? (v / 1000) + "k" : v;
-
-  function legends() {
-    const shapeSvg = (shape, c) => {
-      const s = document.createElementNS(NS, "svg"); s.setAttribute("width", 14); s.setAttribute("height", 14);
-      marker(s, shape, 7, 7, 5, c); return s.outerHTML;
-    };
-    $("#legend1").innerHTML = MODELS.map((m) => `<span>${shapeSvg(m.shape, subColor(m.sub))}${m.name}</span>`).join("")
-      + `<span><svg width="14" height="14"><circle cx="7" cy="7" r="5" fill="none" stroke="var(--ink)" stroke-width="1.5"/></svg>Frontier</span>`;
-    $("#legend2").innerHTML = ["claude", "openai"].map((s) =>
-      `<span><svg width="18" height="4"><rect width="18" height="3" rx="1.5" fill="${subColor(s)}"/></svg>${SUBS[s].name}</span>`).join("");
-  }
-
-  // ---------- chart 1: scatter ----------
-  function drawScatter(rs) {
-    const W = 1080, H = 460, L = 52, R = 110, T = 16, B = 44;
-    const x = logScale(100, 20000, L, W - R), y = linScale(30, 60, H - B, T);
-    const svg = el("svg", { viewBox: `0 0 ${W} ${H}`, role: "img", "aria-label": "Scatter of intelligence index versus tasks per week" });
-    const grid = el("g", {}, svg);
-    for (let v = 30; v <= 60; v += 5) {
-      el("line", { x1: L, x2: W - R, y1: y(v), y2: y(v), stroke: "var(--grid)" }, grid);
-      el("text", { x: L - 8, y: y(v) + 4, "text-anchor": "end" }, grid).textContent = v;
-    }
-    LOG_TICKS.forEach((v) => {
-      el("line", { x1: x(v), x2: x(v), y1: T, y2: H - B, stroke: "var(--grid)" }, grid);
-      el("text", { x: x(v), y: H - B + 18, "text-anchor": "middle" }, grid).textContent = tk(v);
-    });
-    el("text", { x: (L + W - R) / 2, y: H - 6, "text-anchor": "middle" }, grid).textContent = "Tasks finished per week (log scale) →";
-    el("text", { x: 14, y: T + 4, transform: `rotate(-90 14 ${T + 4})`, "text-anchor": "end" }, grid).textContent = "AA Intelligence Index ↑";
-
-    const lines = el("g", {}, svg), pts = el("g", {}, svg), labels = el("g", {}, svg);
-    MODELS.forEach((m) => {
-      const mr = rs.filter((r) => r.m === m && r.ok);
-      if (!mr.length) return;
-      el("polyline", { points: mr.map((r) => `${x(r.tasks)},${y(r.ii)}`).join(" "), fill: "none", stroke: subColor(m.sub), "stroke-width": 2, "stroke-opacity": .55, "stroke-linejoin": "round" }, lines);
-      mr.forEach((r) => {
-        const g = el("g", { tabindex: 0, "aria-label": `${r.label}: index ${r.ii}, ${fmt(r.tasks)} tasks per week` }, pts);
-        if (r.frontier) el("circle", { cx: x(r.tasks), cy: y(r.ii), r: 10, fill: "none", stroke: "var(--ink)", "stroke-width": 1.5 }, g);
-        marker(g, m.shape, x(r.tasks), y(r.ii), 5.5, subColor(m.sub));
-        el("circle", { cx: x(r.tasks), cy: y(r.ii), r: 14, fill: "transparent" }, g);
-        g.addEventListener("mouseenter", (e) => showTip(e, r));
-        g.addEventListener("mousemove", moveTip);
-        g.addEventListener("mouseleave", hideTip);
-        g.addEventListener("focus", () => { const b = g.getBoundingClientRect(); showTip({ clientX: b.right, clientY: b.bottom }, r); });
-        g.addEventListener("blur", hideTip);
-      });
-      const top = mr[mr.length - 1];
-      const t = el("text", { class: "lbl", x: x(top.tasks) - 14, y: y(top.ii) + 4, "text-anchor": "end" }, labels);
-      t.textContent = m.short;
-    });
-    // de-collide end labels vertically
-    const ls = [...labels.children].sort((a, b) => +a.getAttribute("y") - +b.getAttribute("y"));
-    for (let i = 1; i < ls.length; i++) {
-      const p = ls[i - 1], c = ls[i];
-      const px = +p.getAttribute("x"), cx = +c.getAttribute("x");
-      if (Math.abs(px - cx) < 90 && +c.getAttribute("y") - +p.getAttribute("y") < 15) c.setAttribute("y", +p.getAttribute("y") + 15);
-    }
-    $("#scatter").replaceChildren(svg);
-  }
-
-  // ---------- chart 2: best tasks/week vs quality bar ----------
-  function drawCurve(rs) {
-    const W = 1080, H = 380, L = 52, R = 20, T = 16, B = 44;
-    const x = linScale(34, 58, L, W - R), y = logScale(100, 20000, H - B, T);
-    const svg = el("svg", { viewBox: `0 0 ${W} ${H}`, role: "img", "aria-label": "Best tasks per week by minimum intelligence" });
-    const grid = el("g", {}, svg);
-    LOG_TICKS.forEach((v) => {
-      el("line", { x1: L, x2: W - R, y1: y(v), y2: y(v), stroke: "var(--grid)" }, grid);
-      el("text", { x: L - 8, y: y(v) + 4, "text-anchor": "end" }, grid).textContent = tk(v);
-    });
-    for (let v = 34; v <= 58; v += 2) el("text", { x: x(v), y: H - B + 18, "text-anchor": "middle" }, grid).textContent = v;
-    el("line", { x1: L, x2: W - R, y1: H - B, y2: H - B, stroke: "var(--rule)" }, grid);
-    el("text", { x: (L + W - R) / 2, y: H - 6, "text-anchor": "middle" }, grid).textContent = "Minimum AA Intelligence Index you accept →";
-
-    // selected bar marker
-    el("line", { x1: x(state.bar), x2: x(state.bar), y1: T, y2: H - B, stroke: "var(--ink)", "stroke-dasharray": "3 4", "stroke-width": 1.2 }, svg);
-
-    ["claude", "openai"].forEach((s) => {
-      const segs = []; let cur = [];
-      for (let b = 34; b <= 58; b++) {
-        const r = bestAt(rs, s, b);
-        if (r) cur.push([b, r]); else if (cur.length) { segs.push(cur); cur = []; }
-      }
-      if (cur.length) segs.push(cur);
-      segs.forEach((seg) => {
-        let d = "";
-        seg.forEach(([b, r], i) => {
-          const xs = x(Math.max(34, b - 0.5)), xe = x(Math.min(58, b + 0.5)), yy = y(r.tasks);
-          d += (i === 0 ? `M${xs},${yy}` : `L${xs},${yy}`) + `L${xe},${yy}`;
-        });
-        el("path", { d, fill: "none", stroke: subColor(s), "stroke-width": 2.5, "stroke-linejoin": "round" }, svg);
-      });
-      // hover targets per integer bar
-      segs.flat().forEach(([b, r]) => {
-        const g = el("g", {}, svg);
-        el("rect", { x: x(b - 0.5), y: y(r.tasks) - 10, width: x(1) - x(0), height: 20, fill: "transparent" }, g);
-        g.addEventListener("mouseenter", (e) => showTip(e, r));
-        g.addEventListener("mousemove", moveTip);
-        g.addEventListener("mouseleave", hideTip);
-      });
-      const r = bestAt(rs, s, state.bar);
-      if (r) {
-        el("circle", { cx: x(state.bar), cy: y(r.tasks), r: 5, fill: subColor(s), stroke: "var(--panel)", "stroke-width": 2 }, svg);
-        const t = el("text", { class: "lbl", x: x(state.bar) + 10, y: y(r.tasks) + (s === "claude" ? -8 : 16) }, svg);
-        t.textContent = `${r.label} · ${fmt(r.tasks)}`;
-        if (x(state.bar) > W - 260) { t.setAttribute("x", x(state.bar) - 10); t.setAttribute("text-anchor", "end"); }
-      }
-    });
-    $("#curve").replaceChildren(svg);
-
-    // plain-language summary of who leads across the range
-    const bands = []; let prev = null;
-    for (let b = 34; b <= 58; b++) {
-      const c = bestAt(rs, "claude", b), o = bestAt(rs, "openai", b);
-      const w = c && o ? (c.tasks >= o.tasks ? "claude" : "openai") : c ? "claude" : o ? "openai" : null;
-      if (prev && prev.w === w) prev.to = b; else { prev = { w, from: b, to: b }; bands.push(prev); }
-    }
-    $("#bands").innerHTML = "Who finishes more tasks: " + bands.filter((x) => x.w).map((x) =>
-      `<strong>${SUBS[x.w].name}</strong> at ${x.from === x.to ? x.from : x.from + "–" + x.to}`).join(" · ") + ".";
-  }
-
-  // ---------- verdict meter ----------
-  function drawVerdict(rs) {
-    const bar = state.bar;
-    const c = bestAt(rs, "claude", bar), o = bestAt(rs, "openai", bar);
-    const max = Math.max(c ? c.tasks : 0, o ? o.tasks : 0) || 1;
-    const row = (s, r) => `
-      <div class="bar-label">${SUBS[s].name}<small>${r ? `${r.m.name} · ${r.v.effort} (index ${r.ii})` : "No model reaches this score"}</small></div>
-      <div class="track"><div class="fill" style="width:${r ? Math.max(2, r.tasks / max * 100) : 0}%;background:${subColor(s)}"></div>
-      <span class="fill-val">${r ? fmt(r.tasks) + " tasks/wk" : "—"}</span></div>`;
-    $("#meter").innerHTML = row("claude", c) + row("openai", o);
-    let line;
-    if (c && o) {
-      const w = c.tasks >= o.tasks ? [c, o] : [o, c];
-      const ratio = w[0].tasks / w[1].tasks;
-      line = `At index ${bar} or higher, <strong>${w[0].subName}</strong> finishes <strong>${ratio.toFixed(2)}×</strong> as many tasks, using ${w[0].m.name} at ${w[0].v.effort} effort.`;
-    } else if (c || o) {
-      const r = c || o;
-      line = `At index ${bar} or higher, only <strong>${r.subName}</strong> has a model that qualifies: ${r.m.name} at ${r.v.effort} effort.`;
-    } else line = `No tracked model reaches index ${bar}.`;
-    $("#verdictLine").innerHTML = line;
-    $("#barOut").textContent = bar;
-  }
-
-  // ---------- table ----------
-  function drawTable(rs) {
-    const k = state.sortK, d = state.sortDir;
-    const sorted = [...rs].sort((a, b) => {
-      if (a.ok !== b.ok) return a.ok ? -1 : 1;
-      const av = a[k], bv = b[k];
-      if (av == null && bv == null) return 0;
-      if (av == null) return 1; if (bv == null) return -1;
-      return typeof av === "string" ? d * av.localeCompare(bv) : d * (av - bv);
-    });
-    const maxT = Math.max(...rs.filter((r) => r.ok).map((r) => r.tasks));
-    let rank = 0;
-    $("#ledger tbody").innerHTML = sorted.map((r) => `
-      <tr class="${r.ok ? "" : "gap"}">
-        <td class="n">${r.ok ? ++rank : ""}</td>
-        <td><span class="dot" style="background:${subColor(r.sub)}"></span><a href="${r.v.src}" target="_blank" rel="noopener">${r.m.name}</a> · ${r.v.effort}</td>
-        <td>${r.subName}</td>
-        <td class="n">${r.ii ?? "—"}</td>
-        <td class="n">${money(r.cost)}</td>
-        <td class="n">${r.speed ?? "—"}</td>
-        <td class="n">$${r.m.price.in} · $${r.m.price.out}</td>
-        <td class="n">$${fmt(r.budget)}</td>
-        <td class="n">${fmt(r.tasks)}${r.ok ? `<span class="minibar" style="width:${Math.max(2, Math.log10(r.tasks / 100) / Math.log10(maxT / 100) * 60)}px;background:${subColor(r.sub)}"></span>` : ""}</td>
-        <td class="n">${r.ipd == null ? "—" : r.ipd.toFixed(0)}</td>
-        <td>${r.frontier ? '<span class="pill" title="No other option is at least as smart and finishes more tasks">Frontier</span>' : ""}</td>
-      </tr>`).join("");
-    document.querySelectorAll("#ledger th button").forEach((b) => {
-      if (b.dataset.k === k) b.setAttribute("aria-sort", d < 0 ? "descending" : "ascending"); else b.removeAttribute("aria-sort");
-    });
-  }
-
-  function render() {
-    const rs = rows();
-    drawVerdict(rs); drawScatter(rs); drawCurve(rs); drawTable(rs);
-  }
-
-  // ---------- wiring ----------
-  $("#bar").value = state.bar;
-  $("#bar").addEventListener("input", (e) => {
-    state.bar = +e.target.value;
-    try { localStorage.setItem("wsiwi-bar", state.bar); } catch (err) {}
-    const rs = rows(); drawVerdict(rs); drawCurve(rs);
-  });
-  [["vClaude", "claude"], ["vFable", "fable"], ["vSol", "sol"], ["vAstra", "astra"]].forEach(([id, key]) => {
-    $("#" + id).addEventListener("input", (e) => { const v = +e.target.value; if (v >= 0) { state[key] = v; render(); } });
-  });
-  document.querySelectorAll("#ledger th button").forEach((b) => b.addEventListener("click", () => {
-    const k = b.dataset.k;
-    if (state.sortK === k) state.sortDir *= -1; else { state.sortK = k; state.sortDir = (k === "label" || k === "subName" || k === "cost" || k === "price") ? 1 : -1; }
-    drawTable(rows());
-  }));
-  $("#updated").textContent = "Data snapshot " + window.WSIWI_UPDATED;
-
-  legends();
-  render();
-})();
-</script>
+<script src="app.js"></script>
 </body>
 </html>
