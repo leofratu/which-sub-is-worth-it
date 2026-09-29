@@ -327,7 +327,7 @@ footer { margin-top: 48px; padding-top: 18px; border-top: 1px solid var(--rule);
           <small id="fableHint"></small>
         </div>
         <div class="field">
-          <div class="field-head"><label for="rSol">OpenAI Pro 20x · Sol</label>
+          <div class="field-head"><label for="rSol">OpenAI Pro 20x · Sol, 6.1 Sol</label>
             <span class="field-val">$<input id="nSol" type="number" min="0" max="5000" step="50" aria-label="OpenAI Pro dollars per week on GPT-6 Sol"></span></div>
           <input id="rSol" type="range" min="500" max="3000" step="50">
           <small id="solHint"></small>
@@ -372,8 +372,8 @@ footer { margin-top: 48px; padding-top: 18px; border-top: 1px solid var(--rule);
 
   <section id="crossover">
     <div class="sec-head">
-      <h2>Does GPT-6 Sol's efficiency make up for it?</h2>
-      <p>The best tasks/week each plan can reach as you raise the minimum score. Sol has the lowest cost per task of any model, so it only loses on volume when OpenAI's limits are too small to use that advantage. With limits cut in half, Sol's advantage is gone: Claude Max 20x finishes more tasks at every score. Drag OpenAI limits to 100% to see the pre-cut picture, where Sol wins some low bands. Above 53, OpenAI has no model left.</p>
+      <h2>Does Sol's efficiency make up for it?</h2>
+      <p>The best tasks/week each plan can reach as you raise the minimum score. GPT-6.1 Sol reaches a score of 51 at $0.39 per task, which makes it OpenAI's workhorse from 45 to 52. With limits cut in half, Claude Max 20x still wins at every score, but only by about 1% at 45–51. Drag OpenAI limits to 100% and 6.1 Sol wins 43–52 by up to 2×. Above 53, OpenAI has no model left.</p>
       <p class="bands" id="bands"></p>
     </div>
     <div class="panel">
@@ -447,7 +447,7 @@ footer { margin-top: 48px; padding-top: 18px; border-top: 1px solid var(--rule);
           <li>An AA task is a benchmark task, not your task. Use the ratios, not the absolute counts.</li>
           <li>Weekly plan values are estimates and move when vendors change limits.</li>
           <li>Rankings assume one model for the whole week. Build your week splits one shared budget between two.</li>
-          <li>Missing values: Sonnet 5.5 xhigh (all), Fable 5.1 medium and Astra xhigh cost, and several speeds. PRs with a source are welcome.</li>
+          <li>Missing values: Sonnet 5.5 xhigh and GPT-6.1 Sol medium and high (all), Fable 5.1 medium and Astra xhigh cost, and several speeds. PRs with a source are welcome.</li>
         </ul>
       </div>
       <div>
