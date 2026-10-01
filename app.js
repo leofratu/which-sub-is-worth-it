@@ -23,7 +23,7 @@
     fable: SUBS.claude.fableShare * 100,
     sol: SUBS.openai.weeklyValueByModel["gpt-6-sol"],
     astra: SUBS.openai.weeklyValueByModel["gpt-6-astra"],
-    era: "after",
+    cut: "before", cutPct: SUBS.openai.cutScale * 100,
     size: 2, hidden: [], bar: 48, preset: "balanced",
     mix: DEFAULT_MIX,
     cmp: { a: "claude-opus-5-5|medium", b: "gpt-6-1-sol|xhigh" },
@@ -38,7 +38,7 @@
       mix: { claude: { main: "claude-opus-5-5|medium", hard: "claude-opus-5-5|xhigh", h: 30 }, openai: { main: "gpt-6-astra|medium", hard: "gpt-6-astra|max", h: 30 } } },
   ];
 
-  const STORE = "wsiwi-state-v6";
+  const STORE = "wsiwi-state-v7";
   let state = structuredClone(DEFAULTS);
   try {
     const saved = JSON.parse(localStorage.getItem(STORE) || "null");
@@ -100,20 +100,19 @@
 
   // ---------- model economics ----------
   // Full-week $ value if the whole limit went to this model, and the share of the limit it may use.
-  function weekValue(m) {
+  // `cut` picks the OpenAI limit state: "before" = full limits, "after" = cutPct% of them.
+  function weekValue(m, cut = state.cut) {
     if (m.sub === "claude") return state.claude;
-    return m.id === "gpt-6-astra" ? state.astra : state.sol;
+    return (m.id === "gpt-6-astra" ? state.astra : state.sol) * (cut === "after" ? state.cutPct / 100 : 1);
   }
   const limitCap = (m) => m.id === "claude-fable-5-1" ? state.fable / 100 : 1;
   const size = () => SIZES[state.size];
 
-  const NEW_MODEL = "gpt-6-1-sol";
-  function rows(era = state.era) {
+  function rows(cut = state.cut) {
     const hidden = new Set(state.hidden);
-    if (era === "before") hidden.add(NEW_MODEL);
     const out = [];
     MODELS.forEach((m) => m.variants.forEach((v) => {
-      const b = weekValue(m) * limitCap(m);
+      const b = weekValue(m, cut) * limitCap(m);
       const ok = v.ii != null && v.cost != null;
       const use = ok && b > 0 && !hidden.has(m.id);
       out.push({
@@ -454,7 +453,7 @@
       const r = c || o;
       line = `At index ${bar} or higher, only <strong>${r.subName}</strong> has a model that qualifies: ${r.m.name} at ${r.v.effort} effort.`;
     } else line = `No selected model reaches index ${bar}.`;
-    $("#verdictLine").innerHTML = (state.era === "before" ? '<span class="pill" style="margin:0 8px 0 0">Before 6.1 Sol</span>' : "") + line;
+    $("#verdictLine").innerHTML = (state.cut === "after" ? `<span class="pill" style="margin:0 8px 0 0">After cut · ${Math.round(state.cutPct)}% limits</span>` : "") + line;
     $("#barOut").textContent = bar; $("#bar").value = bar;
     $("#bar2Out").textContent = bar; $("#bar2").value = bar;
 
@@ -498,17 +497,15 @@
   }
 
   // ---------- build your week ----------
-  function mixOptions(sub, all) {
-    return MODELS.filter((m) => m.sub === sub && (all || state.era === "after" || m.id !== NEW_MODEL)).flatMap((m) => m.variants
+  function mixOptions(sub) {
+    return MODELS.filter((m) => m.sub === sub).flatMap((m) => m.variants
       .filter((v) => v.ii != null && v.cost != null)
       .map((v) => ({ key: key(m, v), m, v, text: `${m.short} · ${v.effort} (index ${v.ii})` })));
   }
   function computeMix(sub) {
     const opts = mixOptions(sub), cfg = state.mix[sub];
-    // Before 6.1 Sol existed, fall back to the same effort on GPT-6 Sol.
-    const pick = (k, dflt) => opts.find((o) => o.key === k) || opts.find((o) => o.key === k.replace(NEW_MODEL, "gpt-6-sol")) || dflt;
-    const main = pick(cfg.main, opts[0]);
-    const hard = pick(cfg.hard, opts[opts.length - 1]);
+    const main = opts.find((o) => o.key === cfg.main) || opts[0];
+    const hard = opts.find((o) => o.key === cfg.hard) || opts[opts.length - 1];
     const w = clamp(cfg.h, 0, 100) / 100, sz = size();
     // share of the weekly limit one task uses on each model
     const fM = main.v.cost * sz / weekValue(main.m), fH = hard.v.cost * sz / weekValue(hard.m);
@@ -549,16 +546,8 @@
       manual(); save(); drawMix(); drawPresets(rows());
     });
   }
-  let mixEra = null;
   function drawMix() {
     const res = {};
-    if (mixEra !== state.era) {
-      PLANS.forEach((sub) => {
-        const html = mixOptions(sub).map((o) => `<option value="${o.key}">${o.text}</option>`).join("");
-        $(`#mixMain-${sub}`).innerHTML = html; $(`#mixHard-${sub}`).innerHTML = html;
-      });
-      mixEra = state.era;
-    }
     PLANS.forEach((sub) => {
       const r = res[sub] = computeMix(sub), cfg = state.mix[sub];
       $(`#mixMain-${sub}`).value = r.main.key;
@@ -586,7 +575,7 @@
 
   // ---------- head to head ----------
   function buildCmpUI() {
-    const opts = PLANS.map((s) => `<optgroup label="${SUBS[s].name}">` + mixOptions(s, true).map((o) => `<option value="${o.key}">${o.text}</option>`).join("") + `</optgroup>`).join("");
+    const opts = PLANS.map((s) => `<optgroup label="${SUBS[s].name}">` + mixOptions(s).map((o) => `<option value="${o.key}">${o.text}</option>`).join("") + `</optgroup>`).join("");
     $("#cmpA").innerHTML = opts; $("#cmpB").innerHTML = opts;
     $("#cmpA").addEventListener("change", (e) => setCmp("a", e.target.value, true));
     $("#cmpB").addEventListener("change", (e) => setCmp("b", e.target.value, true));
@@ -740,7 +729,11 @@
   };
   function drawChange() {
     const eras = { before: rows("before"), after: rows("after") };
-    $$("#eraSeg button").forEach((b) => b.setAttribute("aria-pressed", String(b.dataset.era === state.era)));
+    const pct = Math.round(state.cutPct);
+    $$("#cutSeg button").forEach((b) => b.setAttribute("aria-pressed", String(b.dataset.cut === state.cut)));
+    $("#cutAfterLbl").textContent = `After the cut (${pct}%)`;
+    $("#cutPct").value = state.cutPct; $("#cutPctOut").textContent = pct + "%";
+    $("#cutHint").textContent = `OpenAI Pro 20x after the cut: $${fmt(state.sol * pct / 100)}/week on Sol and 6.1 Sol, $${fmt(state.astra * pct / 100)} on Astra.`;
     const strip = (era) => {
       let cells = "";
       for (let b = BAR_MIN; b <= BAR_MAX; b++) {
@@ -748,7 +741,7 @@
         const t = w ? `Index ${b}: ${w.w.subName} via ${w.w.label}${w.ratio ? `, ${w.ratio.toFixed(2)}×` : ""}` : `Index ${b}: no model`;
         cells += `<i title="${t}" style="background:${w ? subColor(w.sub) : "var(--grid)"};opacity:${w && w.ratio && w.ratio < 1.1 ? .55 : 1}"></i>`;
       }
-      return `<div class="strip-row${state.era === era ? " cur" : ""}"><span>${era === "before" ? "Before 6.1 Sol" : "After 6.1 Sol"}</span><div class="strip">${cells}</div></div>`;
+      return `<div class="strip-row${state.cut === era ? " cur" : ""}"><span>${era === "before" ? "Before the cut" : `After the cut (${pct}%)`}</span><div class="strip">${cells}</div></div>`;
     };
     let ticks = "";
     for (let b = BAR_MIN; b <= BAR_MAX; b++) ticks += `<span>${b % 2 === 0 ? b : ""}</span>`;
@@ -760,12 +753,13 @@
       return `<tr><td class="n">${b}</td><td>${cell(B)}</td><td>${cell(A)}</td><td>${flip ? '<span class="pill">Flipped</span>' : ""}</td></tr>`;
     }).join("");
   }
-  $("#eraSeg").addEventListener("click", (e) => {
-    const b = e.target.closest("[data-era]");
-    if (!b || b.dataset.era === state.era) return;
-    state.era = b.dataset.era; save(); render();
-    toast(state.era === "before" ? "Showing the page before GPT-6.1 Sol" : "Showing the page with GPT-6.1 Sol");
+  $("#cutSeg").addEventListener("click", (e) => {
+    const b = e.target.closest("[data-cut]");
+    if (!b || b.dataset.cut === state.cut) return;
+    state.cut = b.dataset.cut; save(); render();
+    toast(state.cut === "before" ? "Full OpenAI limits (before the cut)" : `OpenAI limits cut to ${Math.round(state.cutPct)}%`);
   });
+  $("#cutPct").addEventListener("input", (e) => { state.cutPct = +e.target.value; save(); render(); });
 
   function render() {
     const rs = rows();
