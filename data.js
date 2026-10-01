@@ -22,10 +22,7 @@ window.WSIWI_SUBS = {
     name: "OpenAI Pro 20x",
     vendor: "OpenAI",
     // Different models draw on limits with different weights, so value differs per model.
-    // These are the pre-cut estimates at full limits.
     weeklyValueByModel: { "gpt-6-sol": 1300, "gpt-6-1-sol": 1300, "gpt-6-astra": 1400 },
-    // Scenario: Pro 20x limits cut in half. Effective value = weeklyValueByModel × limitScale.
-    limitScale: 0.5,
   },
 };
 

@@ -18,7 +18,7 @@ Open `index.html` in a browser, or serve the folder with GitHub Pages. There is 
 | Plan | Weekly API value (estimate) | Models |
 |---|---|---|
 | Claude Max 20x | ~$2,200–2,300 | Claude Opus 5.5, Claude Sonnet 5.5 at full value. Claude Fable 5.1 at the same rate, but it can use only 50% of the weekly limits (~$1,125). |
-| OpenAI Pro 20x | ~$1,300 on GPT-6 Sol and GPT-6.1 Sol (same pricing), ~$1,400 on GPT-6 Astra at full limits. **Current scenario: limits cut in half**, so ~$650 / ~$700. | Limits are weighted differently per model. The "OpenAI limits" slider sets the cut. |
+| OpenAI Pro 20x | ~$1,300 on GPT-6 Sol and GPT-6.1 Sol (same pricing), ~$1,400 on GPT-6 Astra. | Limits are weighted differently per model. |
 
 Each model is tracked at low, medium, high, xhigh and max effort. For each one the page records the AA Intelligence Index (v4.3.2), cost per task, output speed and list price.
 
@@ -27,6 +27,7 @@ Each model is tracked at low, medium, high, xhigh and max effort. For each one t
 - **Sticky control bar.** Section navigation that tracks where you are, a live Claude vs. OpenAI scoreboard, a quality-bar slider that works from anywhere on the page, and a light/dark toggle.
 - **Scenarios.** One-click presets (Volume first, Balanced, Hard problems, Long agent runs), each showing its current winner.
 - **Quality-bar meter + week at a glance.** Pick a minimum Intelligence Index and see which plan finishes more tasks. A unit chart shows a week of work as squares that animate as you change settings. Pick a minimum Intelligence Index and see which plan finishes more tasks, and with which model and effort.
+- **Before / after GPT-6.1 Sol.** A switch that shows the whole page with or without 6.1 Sol, winner strips for both, and a table of flipped scores.
 - **Your assumptions.** Sliders with exact-entry boxes for each plan's weekly value, the Fable limit cap and your task size (how many AA tasks one of your tasks is worth). Toggle models in or out and reset to defaults. Settings are remembered in your browser.
 - **Intelligence vs. tasks/week scatter.** Each model's effort curve, with the Pareto frontier ringed. Click a legend entry to hide a model. Points glide to new positions as you change assumptions. Click a point to pin its details, set it as your bar, or send it to the head-to-head.
 - **"Does Sol's efficiency make up for it?"** The best tasks/week each plan can reach at every quality bar, with a computed summary of which plan leads where. Hover to compare, click to set the bar.
@@ -36,12 +37,23 @@ Each model is tracked at low, medium, high, xhigh and max effort. For each one t
 
 Code: `index.html` (layout and styles), `app.js` (rendering and interaction), `data.js` (all numbers).
 
-## Headline (snapshot 2026-09-29, OpenAI Pro 20x limits cut in half)
+## Headline (snapshot 2026-10-01): before and after GPT-6.1 Sol
 
-- Claude Max 20x finishes more tasks at every quality bar from 34 to 58, but GPT-6.1 Sol makes it close.
-- GPT-6.1 Sol xhigh reaches a score of 51 at $0.39 per task. At scores 45–51 it finishes ~1,667 tasks/week against Opus 5.5 medium's ~1,679, a lead of about 1%.
-- At a score of 52, Opus 5.5 high (~1,236) beats GPT-6.1 Sol max (~903) by 1.37×. At 53 or higher, only Astra max is left on OpenAI, and Claude leads 5.76×.
-- At full OpenAI limits (drag the slider to 100%), OpenAI wins at scores 34, 37–40 and 43–52, up to 1.99× at 48–51. Claude wins at 35–36, 41–42 and 53+.
+The page has a **Before / After 6.1 Sol** switch that recomputes everything, plus strips showing which plan wins at each minimum score.
+
+| Min. index | Before 6.1 Sol | After 6.1 Sol |
+|---|---|---|
+| 34 | OpenAI · Sol low, 1.82× | OpenAI · Sol low, 1.82× |
+| 40 | OpenAI · Sol medium, 1.27× | OpenAI · Sol medium, 1.27× |
+| 44 | OpenAI · Sol xhigh, 1.18× | OpenAI · 6.1 Sol xhigh, 1.60× |
+| 48 | Claude · Opus 5.5 medium, 1.37× | **OpenAI** · 6.1 Sol xhigh, 1.99× |
+| 51 | Claude · Opus 5.5 medium, 2.07× | **OpenAI** · 6.1 Sol xhigh, 1.99× |
+| 52 | Claude · Opus 5.5 high, 2.88× | **OpenAI** · 6.1 Sol max, 1.46× |
+| 53+ | Claude · Opus 5.5 | Claude · Opus 5.5 |
+
+- Before 6.1 Sol, OpenAI won at scores 34, 37–40 and 43–44, and Claude won everywhere else.
+- After 6.1 Sol, OpenAI wins at 34, 37–40 and 43–52. Claude keeps 35–36, 41–42 and 53+.
+- GPT-6.1 Sol xhigh scores 51 at $0.39 per task. That's about Opus 5.5 medium's score at less than a third of the cost per task.
 
 ## Contributing
 

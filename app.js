@@ -23,7 +23,7 @@
     fable: SUBS.claude.fableShare * 100,
     sol: SUBS.openai.weeklyValueByModel["gpt-6-sol"],
     astra: SUBS.openai.weeklyValueByModel["gpt-6-astra"],
-    olimit: SUBS.openai.limitScale * 100,
+    era: "after",
     size: 2, hidden: [], bar: 48, preset: "balanced",
     mix: DEFAULT_MIX,
     cmp: { a: "claude-opus-5-5|medium", b: "gpt-6-1-sol|xhigh" },
@@ -38,7 +38,7 @@
       mix: { claude: { main: "claude-opus-5-5|medium", hard: "claude-opus-5-5|xhigh", h: 30 }, openai: { main: "gpt-6-astra|medium", hard: "gpt-6-astra|max", h: 30 } } },
   ];
 
-  const STORE = "wsiwi-state-v5";
+  const STORE = "wsiwi-state-v6";
   let state = structuredClone(DEFAULTS);
   try {
     const saved = JSON.parse(localStorage.getItem(STORE) || "null");
@@ -102,13 +102,15 @@
   // Full-week $ value if the whole limit went to this model, and the share of the limit it may use.
   function weekValue(m) {
     if (m.sub === "claude") return state.claude;
-    return (m.id === "gpt-6-astra" ? state.astra : state.sol) * state.olimit / 100;
+    return m.id === "gpt-6-astra" ? state.astra : state.sol;
   }
   const limitCap = (m) => m.id === "claude-fable-5-1" ? state.fable / 100 : 1;
   const size = () => SIZES[state.size];
 
-  function rows() {
+  const NEW_MODEL = "gpt-6-1-sol";
+  function rows(era = state.era) {
     const hidden = new Set(state.hidden);
+    if (era === "before") hidden.add(NEW_MODEL);
     const out = [];
     MODELS.forEach((m) => m.variants.forEach((v) => {
       const b = weekValue(m) * limitCap(m);
@@ -452,7 +454,7 @@
       const r = c || o;
       line = `At index ${bar} or higher, only <strong>${r.subName}</strong> has a model that qualifies: ${r.m.name} at ${r.v.effort} effort.`;
     } else line = `No selected model reaches index ${bar}.`;
-    $("#verdictLine").innerHTML = line;
+    $("#verdictLine").innerHTML = (state.era === "before" ? '<span class="pill" style="margin:0 8px 0 0">Before 6.1 Sol</span>' : "") + line;
     $("#barOut").textContent = bar; $("#bar").value = bar;
     $("#bar2Out").textContent = bar; $("#bar2").value = bar;
 
@@ -496,15 +498,17 @@
   }
 
   // ---------- build your week ----------
-  function mixOptions(sub) {
-    return MODELS.filter((m) => m.sub === sub).flatMap((m) => m.variants
+  function mixOptions(sub, all) {
+    return MODELS.filter((m) => m.sub === sub && (all || state.era === "after" || m.id !== NEW_MODEL)).flatMap((m) => m.variants
       .filter((v) => v.ii != null && v.cost != null)
       .map((v) => ({ key: key(m, v), m, v, text: `${m.short} · ${v.effort} (index ${v.ii})` })));
   }
   function computeMix(sub) {
     const opts = mixOptions(sub), cfg = state.mix[sub];
-    const main = opts.find((o) => o.key === cfg.main) || opts[0];
-    const hard = opts.find((o) => o.key === cfg.hard) || opts[opts.length - 1];
+    // Before 6.1 Sol existed, fall back to the same effort on GPT-6 Sol.
+    const pick = (k, dflt) => opts.find((o) => o.key === k) || opts.find((o) => o.key === k.replace(NEW_MODEL, "gpt-6-sol")) || dflt;
+    const main = pick(cfg.main, opts[0]);
+    const hard = pick(cfg.hard, opts[opts.length - 1]);
     const w = clamp(cfg.h, 0, 100) / 100, sz = size();
     // share of the weekly limit one task uses on each model
     const fM = main.v.cost * sz / weekValue(main.m), fH = hard.v.cost * sz / weekValue(hard.m);
@@ -545,8 +549,16 @@
       manual(); save(); drawMix(); drawPresets(rows());
     });
   }
+  let mixEra = null;
   function drawMix() {
     const res = {};
+    if (mixEra !== state.era) {
+      PLANS.forEach((sub) => {
+        const html = mixOptions(sub).map((o) => `<option value="${o.key}">${o.text}</option>`).join("");
+        $(`#mixMain-${sub}`).innerHTML = html; $(`#mixHard-${sub}`).innerHTML = html;
+      });
+      mixEra = state.era;
+    }
     PLANS.forEach((sub) => {
       const r = res[sub] = computeMix(sub), cfg = state.mix[sub];
       $(`#mixMain-${sub}`).value = r.main.key;
@@ -574,7 +586,7 @@
 
   // ---------- head to head ----------
   function buildCmpUI() {
-    const opts = PLANS.map((s) => `<optgroup label="${SUBS[s].name}">` + mixOptions(s).map((o) => `<option value="${o.key}">${o.text}</option>`).join("") + `</optgroup>`).join("");
+    const opts = PLANS.map((s) => `<optgroup label="${SUBS[s].name}">` + mixOptions(s, true).map((o) => `<option value="${o.key}">${o.text}</option>`).join("") + `</optgroup>`).join("");
     $("#cmpA").innerHTML = opts; $("#cmpB").innerHTML = opts;
     $("#cmpA").addEventListener("change", (e) => setCmp("a", e.target.value, true));
     $("#cmpB").addEventListener("change", (e) => setCmp("b", e.target.value, true));
@@ -672,7 +684,6 @@
     { k: "fable", r: "#rFable", n: "#nFable", max: 100 },
     { k: "sol", r: "#rSol", n: "#nSol", max: 5000 },
     { k: "astra", r: "#rAstra", n: "#nAstra", max: 5000 },
-    { k: "olimit", r: "#rOlim", n: "#nOlim", max: 100 },
   ];
   function syncInputs() {
     FIELDS.forEach((f) => {
@@ -681,10 +692,6 @@
     });
     $("#rSize").value = state.size;
     $("#sizeOut").textContent = size() + "×";
-    const cut = state.olimit === 100 ? "at full limits" : `at ${Math.round(state.olimit)}% limits`;
-    $("#solHint").textContent = `GPT-6 and 6.1 Sol, before the cut. Effective $${fmt(state.sol * state.olimit / 100)}/week ${cut}.`;
-    $("#astraHint").textContent = `Before the cut. Effective $${fmt(state.astra * state.olimit / 100)}/week ${cut}.`;
-    $("#olimHint").textContent = state.olimit === 100 ? "No cut: full Pro 20x limits." : state.olimit === 50 ? "Limits cut in half. Drag to 100% to compare." : `Limits at ${Math.round(state.olimit)}% of the original.`;
     $("#fableHint").textContent = `Fable alone gets ${Math.round(state.fable)}% of $${fmt(state.claude)} = $${fmt(state.claude * state.fable / 100)}/week.`;
   }
   FIELDS.forEach((f) => {
@@ -696,7 +703,7 @@
     // on commit, snap any out-of-range or empty entry back to a valid value
     $(f.n).addEventListener("change", (e) => {
       const v = e.target.valueAsNumber;
-      state[f.k] = Number.isFinite(v) ? clamp(v, f.k === "fable" || f.k === "olimit" ? 0 : 1, f.max) : state[f.k];
+      state[f.k] = Number.isFinite(v) ? clamp(v, f.k === "fable" ? 0 : 1, f.max) : state[f.k];
       e.target.value = state[f.k]; save(); syncInputs(); render();
     });
   });
@@ -724,9 +731,45 @@
     navLinks.forEach((a) => { const s = document.querySelector(a.getAttribute("href")); if (s) io.observe(s); });
   }
 
+  // ---------- before / after GPT-6.1 Sol ----------
+  const winnerAt = (rs, b) => {
+    const c = bestAt(rs, "claude", b), o = bestAt(rs, "openai", b);
+    if (!c && !o) return null;
+    const w = c && o ? (c.tasks >= o.tasks ? c : o) : c || o, l = w === c ? o : c;
+    return { sub: w.sub, w, l, ratio: l ? w.tasks / l.tasks : null };
+  };
+  function drawChange() {
+    const eras = { before: rows("before"), after: rows("after") };
+    $$("#eraSeg button").forEach((b) => b.setAttribute("aria-pressed", String(b.dataset.era === state.era)));
+    const strip = (era) => {
+      let cells = "";
+      for (let b = BAR_MIN; b <= BAR_MAX; b++) {
+        const w = winnerAt(eras[era], b);
+        const t = w ? `Index ${b}: ${w.w.subName} via ${w.w.label}${w.ratio ? `, ${w.ratio.toFixed(2)}×` : ""}` : `Index ${b}: no model`;
+        cells += `<i title="${t}" style="background:${w ? subColor(w.sub) : "var(--grid)"};opacity:${w && w.ratio && w.ratio < 1.1 ? .55 : 1}"></i>`;
+      }
+      return `<div class="strip-row${state.era === era ? " cur" : ""}"><span>${era === "before" ? "Before 6.1 Sol" : "After 6.1 Sol"}</span><div class="strip">${cells}</div></div>`;
+    };
+    let ticks = "";
+    for (let b = BAR_MIN; b <= BAR_MAX; b++) ticks += `<span>${b % 2 === 0 ? b : ""}</span>`;
+    $("#strips").innerHTML = strip("before") + strip("after") + `<div class="strip-row ticks"><span>Min. index</span><div class="strip">${ticks}</div></div>`;
+    const cell = (w) => w ? `<span class="dot" style="background:${subColor(w.sub)}"></span>${w.w.subName}<small>${w.w.label} · ${fmt(w.w.tasks)}${w.ratio ? ` · ${w.ratio.toFixed(2)}×` : " · only option"}</small>` : "—";
+    $("#delta tbody").innerHTML = [34, 40, 44, 48, 51, 52, 53, 56].map((b) => {
+      const B = winnerAt(eras.before, b), A = winnerAt(eras.after, b);
+      const flip = B && A && B.sub !== A.sub;
+      return `<tr><td class="n">${b}</td><td>${cell(B)}</td><td>${cell(A)}</td><td>${flip ? '<span class="pill">Flipped</span>' : ""}</td></tr>`;
+    }).join("");
+  }
+  $("#eraSeg").addEventListener("click", (e) => {
+    const b = e.target.closest("[data-era]");
+    if (!b || b.dataset.era === state.era) return;
+    state.era = b.dataset.era; save(); render();
+    toast(state.era === "before" ? "Showing the page before GPT-6.1 Sol" : "Showing the page with GPT-6.1 Sol");
+  });
+
   function render() {
     const rs = rows();
-    drawChips(); drawPresets(rs); drawVerdict(rs); drawScatter(rs); drawPin(rs); drawCurve(rs); drawMix(); drawCmp(rs); drawTable(rs);
+    drawChips(); drawPresets(rs); drawVerdict(rs); drawChange(); drawScatter(rs); drawPin(rs); drawCurve(rs); drawMix(); drawCmp(rs); drawTable(rs);
   }
 
   // ---------- wiring ----------
