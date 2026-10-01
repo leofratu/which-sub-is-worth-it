@@ -120,6 +120,23 @@ a:focus-visible, button:focus-visible, input:focus-visible, select:focus-visible
 .cmp-val.win::after { content: " ●"; font-size: 9px; vertical-align: 2px; }
 .cmp-sum { margin: 16px 0 0; font-size: 17px; }
 
+/* before / after */
+.change { display: grid; gap: 18px; }
+.seg { display: inline-flex; justify-self: start; border: 1.5px solid var(--ink); border-radius: 99px; padding: 3px; gap: 3px; }
+.seg button { all: unset; cursor: pointer; font: 600 14px var(--f-body); padding: 7px 16px; border-radius: 99px; color: var(--ink); transition: background .15s, color .15s; }
+.seg button[aria-pressed="true"] { background: var(--hl); color: var(--hl-ink); }
+.seg button:focus-visible { outline: 2px solid var(--ink); outline-offset: 2px; }
+.strips { display: grid; gap: 6px; }
+.strip-row { display: grid; grid-template-columns: 120px 1fr; gap: 12px; align-items: center; }
+.strip-row > span { font-size: 13px; font-weight: 600; color: var(--ink-2); }
+.strip-row.cur > span { color: var(--ink); }
+.strip-row.cur > span::before { content: "▸ "; }
+.strip { display: grid; grid-template-columns: repeat(25, 1fr); gap: 2px; }
+.strip i { height: 26px; border-radius: 2px; display: block; transition: background .3s; }
+.strip-row.ticks .strip span { font: 11px var(--f-mono); color: var(--ink-3); text-align: center; }
+table.delta { min-width: 560px; }
+table.delta small { display: block; color: var(--ink-3); font-size: 12px; margin-left: 17px; }
+
 /* toast */
 #toast { position: fixed; left: 50%; bottom: calc(20px + env(safe-area-inset-bottom, 0px)); transform: translate(-50%, 20px); background: var(--hl); color: var(--hl-ink); padding: 9px 16px; border-radius: 99px; font-size: 14px; opacity: 0; pointer-events: none; transition: opacity .2s, transform .2s; z-index: 30; }
 #toast.show { opacity: 1; transform: translate(-50%, 0); }
@@ -256,6 +273,8 @@ footer { margin-top: 48px; padding-top: 18px; border-top: 1px solid var(--rule);
   .minibar-ctl label { display: none; }
 }
 @media (max-width: 560px) {
+  .strip-row { grid-template-columns: 1fr; gap: 4px; }
+  .strip i { height: 20px; }
   .unit-row { grid-template-columns: 1fr; gap: 6px; }
   .cmp-pick { grid-template-columns: 1fr; }
   .cmp-row { grid-template-columns: 1fr 1fr; }
@@ -272,6 +291,7 @@ footer { margin-top: 48px; padding-top: 18px; border-top: 1px solid var(--rule);
     <a class="brand" href="#top">WHICH SUB?</a>
     <nav class="nav" aria-label="Sections">
       <a href="#verdict">Verdict</a>
+      <a href="#change">Before/after</a>
       <a href="#assumptions">Assumptions</a>
       <a href="#chart">Chart</a>
       <a href="#crossover">Crossover</a>
@@ -307,10 +327,30 @@ footer { margin-top: 48px; padding-top: 18px; border-top: 1px solid var(--rule);
     <div class="units" id="units"></div>
   </section>
 
+  <section id="change">
+    <div class="sec-head">
+      <h2>Before and after GPT-6.1 Sol</h2>
+      <p>Flip the switch to see the whole page as it was before GPT-6.1 Sol shipped. Each strip shows which plan finishes more tasks at every minimum score. Faded squares mean the lead is under 10%. Hover a square for the details.</p>
+    </div>
+    <div class="panel change">
+      <div class="seg" id="eraSeg" role="group" aria-label="Before or after GPT-6.1 Sol">
+        <button type="button" data-era="before">Before 6.1 Sol</button>
+        <button type="button" data-era="after">After 6.1 Sol</button>
+      </div>
+      <div class="strips" id="strips"></div>
+      <div class="table-wrap">
+        <table class="delta" id="delta">
+          <thead><tr><th class="n">Min. index</th><th>Before 6.1 Sol</th><th>After 6.1 Sol</th><th></th></tr></thead>
+          <tbody></tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
   <section id="assumptions">
     <div class="sec-head">
       <h2>Your assumptions</h2>
-      <p>What a full week of each plan is worth in list-price API dollars (OpenAI Pro 20x limits are cut in half by default), how big your tasks are, and which models you would actually use. Every chart and rank on the page updates as you drag.</p>
+      <p>What a full week of each plan is worth in list-price API dollars, how big your tasks are, and which models you would actually use. Every chart and rank on the page updates as you drag.</p>
     </div>
     <div class="panel assume">
       <div class="assume-grid">
@@ -330,19 +370,13 @@ footer { margin-top: 48px; padding-top: 18px; border-top: 1px solid var(--rule);
           <div class="field-head"><label for="rSol">OpenAI Pro 20x · Sol, 6.1 Sol</label>
             <span class="field-val">$<input id="nSol" type="number" min="0" max="5000" step="50" aria-label="OpenAI Pro dollars per week on GPT-6 Sol"></span></div>
           <input id="rSol" type="range" min="500" max="3000" step="50">
-          <small id="solHint"></small>
+          <small>$/week on GPT-6 Sol or GPT-6.1 Sol (same pricing).</small>
         </div>
         <div class="field">
           <div class="field-head"><label for="rAstra">OpenAI Pro 20x · Astra</label>
             <span class="field-val">$<input id="nAstra" type="number" min="0" max="5000" step="50" aria-label="OpenAI Pro dollars per week on GPT-6 Astra"></span></div>
           <input id="rAstra" type="range" min="500" max="3000" step="50">
-          <small id="astraHint"></small>
-        </div>
-        <div class="field">
-          <div class="field-head"><label for="rOlim">OpenAI limits</label>
-            <span class="field-val"><input id="nOlim" type="number" min="0" max="100" step="5" aria-label="OpenAI Pro 20x limits as percent of original">%</span></div>
-          <input id="rOlim" type="range" min="0" max="100" step="5">
-          <small id="olimHint"></small>
+          <small>$/week if the whole week goes to GPT-6 Astra.</small>
         </div>
         <div class="field">
           <div class="field-head"><label for="rSize">Your task size</label>
@@ -373,7 +407,7 @@ footer { margin-top: 48px; padding-top: 18px; border-top: 1px solid var(--rule);
   <section id="crossover">
     <div class="sec-head">
       <h2>Does Sol's efficiency make up for it?</h2>
-      <p>The best tasks/week each plan can reach as you raise the minimum score. GPT-6.1 Sol reaches a score of 51 at $0.39 per task, which makes it OpenAI's workhorse from 45 to 52. With limits cut in half, Claude Max 20x still wins at every score, but only by about 1% at 45–51. Drag OpenAI limits to 100% and 6.1 Sol wins 43–52 by up to 2×. Above 53, OpenAI has no model left.</p>
+      <p>The best tasks/week each plan can reach as you raise the minimum score. GPT-6.1 Sol reaches a score of 51 at $0.39 per task, which makes it OpenAI's workhorse from 43 to 52, where it finishes up to twice as many tasks as Claude Max 20x. Above 52, Opus 5.5 takes over and OpenAI runs out of models. Use the before/after switch to see how this looked with GPT-6 Sol alone.</p>
       <p class="bands" id="bands"></p>
     </div>
     <div class="panel">
