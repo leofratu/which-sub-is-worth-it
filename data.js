@@ -23,6 +23,9 @@ window.WSIWI_SUBS = {
     vendor: "OpenAI",
     // Different models draw on limits with different weights, so value differs per model.
     weeklyValueByModel: { "gpt-6-sol": 1300, "gpt-6-1-sol": 1300, "gpt-6-astra": 1400 },
+    // Limit-cut scenario: share of the weekly limit left after the cut (0.5 = cut in half).
+    // The page compares before (full limits) and after (these values × cutScale).
+    cutScale: 0.5,
   },
 };
 

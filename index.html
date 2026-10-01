@@ -122,6 +122,8 @@ a:focus-visible, button:focus-visible, input:focus-visible, select:focus-visible
 
 /* before / after */
 .change { display: grid; gap: 18px; }
+.cut-ctl { display: flex; flex-wrap: wrap; gap: 12px 24px; align-items: center; }
+.cut-ctl .slider-wrap input[type=range] { width: 160px; }
 .seg { display: inline-flex; justify-self: start; border: 1.5px solid var(--ink); border-radius: 99px; padding: 3px; gap: 3px; }
 .seg button { all: unset; cursor: pointer; font: 600 14px var(--f-body); padding: 7px 16px; border-radius: 99px; color: var(--ink); transition: background .15s, color .15s; }
 .seg button[aria-pressed="true"] { background: var(--hl); color: var(--hl-ink); }
@@ -291,7 +293,7 @@ footer { margin-top: 48px; padding-top: 18px; border-top: 1px solid var(--rule);
     <a class="brand" href="#top">WHICH SUB?</a>
     <nav class="nav" aria-label="Sections">
       <a href="#verdict">Verdict</a>
-      <a href="#change">Before/after</a>
+      <a href="#change">Limit cut</a>
       <a href="#assumptions">Assumptions</a>
       <a href="#chart">Chart</a>
       <a href="#crossover">Crossover</a>
@@ -329,18 +331,25 @@ footer { margin-top: 48px; padding-top: 18px; border-top: 1px solid var(--rule);
 
   <section id="change">
     <div class="sec-head">
-      <h2>Before and after GPT-6.1 Sol</h2>
-      <p>Flip the switch to see the whole page as it was before GPT-6.1 Sol shipped. Each strip shows which plan finishes more tasks at every minimum score. Faded squares mean the lead is under 10%. Hover a square for the details.</p>
+      <h2>Before and after the OpenAI limit cut</h2>
+      <p>What happens if OpenAI cuts Pro 20x limits? Flip the switch to recompute the whole page with or without the cut. Every model is included, GPT-6.1 Sol too. Each strip shows which plan finishes more tasks at every minimum score. Faded squares mean the lead is under 10%. Hover a square for details.</p>
     </div>
     <div class="panel change">
-      <div class="seg" id="eraSeg" role="group" aria-label="Before or after GPT-6.1 Sol">
-        <button type="button" data-era="before">Before 6.1 Sol</button>
-        <button type="button" data-era="after">After 6.1 Sol</button>
+      <div class="cut-ctl">
+        <div class="seg" id="cutSeg" role="group" aria-label="Before or after the OpenAI limit cut">
+          <button type="button" data-cut="before">Before the cut</button>
+          <button type="button" data-cut="after" id="cutAfterLbl">After the cut</button>
+        </div>
+        <label class="slider-wrap" for="cutPct">Limits left after the cut
+          <input type="range" id="cutPct" min="10" max="90" step="5">
+          <output id="cutPctOut" for="cutPct"></output>
+        </label>
       </div>
+      <p class="mix-note" id="cutHint"></p>
       <div class="strips" id="strips"></div>
       <div class="table-wrap">
         <table class="delta" id="delta">
-          <thead><tr><th class="n">Min. index</th><th>Before 6.1 Sol</th><th>After 6.1 Sol</th><th></th></tr></thead>
+          <thead><tr><th class="n">Min. index</th><th>Before the cut</th><th>After the cut</th><th></th></tr></thead>
           <tbody></tbody>
         </table>
       </div>
@@ -407,7 +416,7 @@ footer { margin-top: 48px; padding-top: 18px; border-top: 1px solid var(--rule);
   <section id="crossover">
     <div class="sec-head">
       <h2>Does Sol's efficiency make up for it?</h2>
-      <p>The best tasks/week each plan can reach as you raise the minimum score. GPT-6.1 Sol reaches a score of 51 at $0.39 per task, which makes it OpenAI's workhorse from 43 to 52, where it finishes up to twice as many tasks as Claude Max 20x. Above 52, Opus 5.5 takes over and OpenAI runs out of models. Use the before/after switch to see how this looked with GPT-6 Sol alone.</p>
+      <p>The best tasks/week each plan can reach as you raise the minimum score. GPT-6.1 Sol reaches a score of 51 at $0.39 per task, which makes it OpenAI's workhorse from 43 to 52, where it finishes up to twice as many tasks as Claude Max 20x. Above 52, Opus 5.5 takes over and OpenAI runs out of models. Use the limit-cut switch to see what halving OpenAI's limits does to this.</p>
       <p class="bands" id="bands"></p>
     </div>
     <div class="panel">
