@@ -10,7 +10,7 @@
   const clamp = (v, lo, hi) => Math.min(hi, Math.max(lo, v));
   const key = (m, v) => `${m.id}|${v.effort}`;
   const SIZES = [0.25, 0.5, 1, 2, 3, 5, 10, 20, 50];
-  const BAR_MIN = 34, BAR_MAX = 58;
+  const BAR_MIN = 28, BAR_MAX = 58;
   const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
   const PLANS = ["claude", "openai"];
 
@@ -38,7 +38,7 @@
       mix: { claude: { main: "claude-opus-5-5|medium", hard: "claude-opus-5-5|xhigh", h: 30 }, openai: { main: "gpt-6-astra|medium", hard: "gpt-6-astra|max", h: 30 } } },
   ];
 
-  const STORE = "wsiwi-state-v8";
+  const STORE = "wsiwi-state-v9";
   let state = structuredClone(DEFAULTS);
   try {
     const saved = JSON.parse(localStorage.getItem(STORE) || "null");
@@ -154,6 +154,7 @@
   function marker(g, shape, x, y, r, fill) {
     const a = { fill, stroke: "var(--panel)", "stroke-width": 2 };
     if (shape === "square") return el("rect", { ...a, x: x - r, y: y - r, width: 2 * r, height: 2 * r, rx: 1.5 }, g);
+    if (shape === "triangle") return el("path", { ...a, d: `M${x},${y - r * 1.35}L${x + r * 1.25},${y + r}L${x - r * 1.25},${y + r}Z` }, g);
     if (shape === "diamond") return el("path", { ...a, d: `M${x},${y - r * 1.3}L${x + r * 1.3},${y}L${x},${y + r * 1.3}L${x - r * 1.3},${y}Z` }, g);
     return el("circle", { ...a, cx: x, cy: y, r }, g);
   }
@@ -229,10 +230,10 @@
   function drawScatter(rs) {
     const W = 1080, H = 460, L = 52, R = 24, T = 16, B = 44;
     const D = logDomain(rs);
-    const x = logScale(D.lo, D.hi, L + 90, W - R), y = linScale(30, 60, H - B, T);
+    const x = logScale(D.lo, D.hi, L + 90, W - R), y = linScale(25, 60, H - B, T);
     const svg = el("svg", { viewBox: `0 0 ${W} ${H}`, role: "img", "aria-label": "Scatter of intelligence index versus tasks per week" });
     const grid = el("g", {}, svg);
-    for (let v = 30; v <= 60; v += 5) {
+    for (let v = 25; v <= 60; v += 5) {
       el("line", { x1: L, x2: W - R, y1: y(v), y2: y(v), stroke: "var(--grid)" }, grid);
       el("text", { x: L - 8, y: y(v) + 4, "text-anchor": "end" }, grid).textContent = v;
     }
@@ -741,13 +742,13 @@
         const t = w ? `Index ${b}: ${w.w.subName} via ${w.w.label}${w.ratio ? `, ${w.ratio.toFixed(2)}×` : ""}` : `Index ${b}: no model`;
         cells += `<i title="${t}" style="background:${w ? subColor(w.sub) : "var(--grid)"};opacity:${w && w.ratio && w.ratio < 1.1 ? .55 : 1}"></i>`;
       }
-      return `<div class="strip-row${state.cut === era ? " cur" : ""}"><span>${era === "before" ? "Before the cut" : `After the cut (${pct}%)`}</span><div class="strip">${cells}</div></div>`;
+      return `<div class="strip-row${state.cut === era ? " cur" : ""}"><span>${era === "before" ? "Before the cut" : `After the cut (${pct}%)`}</span><div class="strip" style="grid-template-columns:repeat(${BAR_MAX - BAR_MIN + 1},1fr)">${cells}</div></div>`;
     };
     let ticks = "";
     for (let b = BAR_MIN; b <= BAR_MAX; b++) ticks += `<span>${b % 2 === 0 ? b : ""}</span>`;
-    $("#strips").innerHTML = strip("before") + strip("after") + `<div class="strip-row ticks"><span>Min. index</span><div class="strip">${ticks}</div></div>`;
+    $("#strips").innerHTML = strip("before") + strip("after") + `<div class="strip-row ticks"><span>Min. index</span><div class="strip" style="grid-template-columns:repeat(${BAR_MAX - BAR_MIN + 1},1fr)">${ticks}</div></div>`;
     const cell = (w) => w ? `<span class="dot" style="background:${subColor(w.sub)}"></span>${w.w.subName}<small>${w.w.label} · ${fmt(w.w.tasks)}${w.ratio ? ` · ${w.ratio.toFixed(2)}×` : " · only option"}</small>` : "—";
-    $("#delta tbody").innerHTML = [34, 40, 44, 48, 51, 52, 53, 56].map((b) => {
+    $("#delta tbody").innerHTML = [30, 34, 40, 44, 48, 51, 52, 53, 56].map((b) => {
       const B = winnerAt(eras.before, b), A = winnerAt(eras.after, b);
       const flip = B && A && B.sub !== A.sub;
       return `<tr><td class="n">${b}</td><td>${cell(B)}</td><td>${cell(A)}</td><td>${flip ? '<span class="pill">Flipped</span>' : ""}</td></tr>`;
@@ -762,37 +763,40 @@
   $("#cutPct").addEventListener("input", (e) => { state.cutPct = +e.target.value; save(); render(); });
 
   // ---------- effort ladder: Opus 5.5 vs GPT-6.1 Sol ----------
-  const LADDER = { efforts: ["low", "medium", "high", "xhigh"], models: ["claude-opus-5-5", "gpt-6-1-sol"] };
+  const LADDER = { efforts: ["low", "medium", "high", "xhigh"], models: ["claude-haiku-5-5", "claude-opus-5-5", "gpt-6-1-sol"] };
+  // Two Claude models share the plan color, so Haiku gets a lighter tint of it.
+  const ladderFill = (r) => r.m.id === "claude-haiku-5-5" ? "color-mix(in srgb, var(--claude) 50%, var(--panel))" : subColor(r.sub);
   function drawEffort(rs) {
     const W = 1080, H = 400, L = 64, R = 20, T = 34, B = 64;
     const pick = (id, e) => rs.find((r) => r.m.id === id && r.v.effort === e && r.ok);
     const all = LADDER.efforts.flatMap((e) => LADDER.models.map((id) => pick(id, e))).filter(Boolean);
-    const maxT = Math.max(1, ...all.map((r) => r.tasks));
-    // round the axis top up to a 1-2-5 step
-    const step = [1, 2, 2.5, 5].map((m) => m * 10 ** Math.floor(Math.log10(maxT / 4))).find((s) => s * 5 >= maxT) || 10 ** Math.ceil(Math.log10(maxT / 4));
-    const top = Math.ceil(maxT / step) * step;
-    const y = linScale(0, top, H - B, T);
-    const svg = el("svg", { viewBox: `0 0 ${W} ${H}`, role: "img", "aria-label": "Tasks per week at each reasoning effort, Opus 5.5 versus GPT-6.1 Sol" });
+    // Haiku finishes ~100× more tasks than Opus, so the axis is logarithmic (1-2-5 ticks).
+    const ts = all.map((r) => r.tasks).filter((t) => t > 0);
+    const lo = 10 ** Math.floor(Math.log10(Math.min(...ts, 1e9) / 1.5)), hi = 10 ** Math.ceil(Math.log10(Math.max(...ts, 1) * 1.3));
+    const y = logScale(lo, hi, H - B, T), base = y(lo);
+    const svg = el("svg", { viewBox: `0 0 ${W} ${H}`, role: "img", "aria-label": "Tasks per week at each reasoning effort: Haiku 5.5, Opus 5.5 and GPT-6.1 Sol" });
     const g = el("g", {}, svg);
-    for (let v = 0; v <= top + 1e-9; v += step) {
-      el("line", { x1: L, x2: W - R, y1: y(v), y2: y(v), stroke: v === 0 ? "var(--rule)" : "var(--grid)" }, g);
-      el("text", { x: L - 8, y: y(v) + 4, "text-anchor": "end" }, g).textContent = tk(Math.round(v));
-    }
-    el("text", { x: 14, y: T - 14, "text-anchor": "start" }, g).textContent = "Tasks finished per week";
-    const gw = (W - L - R) / LADDER.efforts.length, bw = Math.min(110, gw * 0.3), gap = 6;
+    for (let e = Math.log10(lo); e <= Math.log10(hi) + 1e-9; e++) [1, 2, 5].forEach((m) => {
+      const v = m * 10 ** e;
+      if (v < lo || v > hi) return;
+      el("line", { x1: L, x2: W - R, y1: y(v), y2: y(v), stroke: v === lo ? "var(--rule)" : "var(--grid)" }, g);
+      el("text", { x: L - 8, y: y(v) + 4, "text-anchor": "end" }, g).textContent = tk(v);
+    });
+    el("text", { x: 14, y: T - 14, "text-anchor": "start" }, g).textContent = "Tasks finished per week (log scale)";
+    const n = LADDER.models.length, gw = (W - L - R) / LADDER.efforts.length, gap = 6, bw = Math.min(80, (gw * 0.8 - gap * (n - 1)) / n);
     LADDER.efforts.forEach((e, i) => {
       const cx = L + gw * i + gw / 2;
       el("text", { class: "lbl", x: cx, y: H - B + 42, "text-anchor": "middle" }, g).textContent = e;
-      const pair = LADDER.models.map((id) => pick(id, e));
-      pair.forEach((r, j) => {
-        if (!r) return;
-        const x0 = cx + (j === 0 ? -bw - gap / 2 : gap / 2), y0 = y(r.tasks), h = Math.max(1, y(0) - y0);
+      const set = LADDER.models.map((id) => pick(id, e));
+      set.forEach((r, j) => {
+        if (!r || !(r.tasks > 0)) return;
+        const x0 = cx - (n * bw + (n - 1) * gap) / 2 + j * (bw + gap), y0 = y(r.tasks), h = Math.max(1, base - y0);
         const grp = el("g", { style: "cursor:default" }, svg);
-        el("path", { d: `M${x0},${y(0)}V${y0 + 4}Q${x0},${y0} ${x0 + 4},${y0}H${x0 + bw - 4}Q${x0 + bw},${y0} ${x0 + bw},${y0 + 4}V${y(0)}Z`, fill: subColor(r.sub), opacity: r.v.est ? .5 : 1 }, grp);
+        el("path", { d: `M${x0},${base}V${y0 + 4}Q${x0},${y0} ${x0 + 4},${y0}H${x0 + bw - 4}Q${x0 + bw},${y0} ${x0 + bw},${y0 + 4}V${base}Z`, fill: ladderFill(r), opacity: r.v.est ? .5 : 1 }, grp);
         if (r.v.est) el("rect", { x: x0, y: y0, width: bw, height: h, fill: "url(#hatch)" }, grp);
         el("text", { class: "lbl", x: x0 + bw / 2, y: y0 - 8, "text-anchor": "middle" }, grp).textContent = fmt(r.tasks);
-        el("text", { x: x0 + bw / 2, y: H - B + 18, "text-anchor": "middle" }, grp).textContent = `idx ${r.ii}${r.v.est ? " est." : ""}`;
-        el("rect", { x: x0, y: T, width: bw, height: y(0) - T, fill: "transparent" }, grp);
+        el("text", { x: x0 + bw / 2, y: H - B + 18, "text-anchor": "middle" }, grp).textContent = `${r.ii}${r.v.est ? "*" : ""}`;
+        el("rect", { x: x0, y: T, width: bw, height: base - T, fill: "transparent" }, grp);
         grp.addEventListener("mouseenter", (ev) => showTip(ev, r, `${money(r.cost)} per task`));
         grp.addEventListener("mousemove", moveTip);
         grp.addEventListener("mouseleave", hideTip);
@@ -804,13 +808,16 @@
     $("#effortChart").replaceChildren(svg);
     $("#effortLegend").innerHTML = LADDER.models.map((id) => {
       const m = MODELS.find((x) => x.id === id);
-      return `<span><svg width="14" height="14"><rect width="14" height="14" rx="2" fill="${subColor(m.sub)}"/></svg>${m.name} · $${fmt(weekValue(m))}/week</span>`;
-    }).join("") + `<span><svg width="14" height="14"><rect width="14" height="14" rx="2" fill="var(--openai)" opacity=".5"/></svg>Estimated (not yet on AA)</span>`;
+      const fill = id === "claude-haiku-5-5" ? "color-mix(in srgb, var(--claude) 50%, var(--panel))" : subColor(m.sub);
+      return `<span><svg width="14" height="14"><rect width="14" height="14" rx="2" fill="${fill}"/></svg>${m.name} · $${fmt(weekValue(m))}/week</span>`;
+    }).join("") + `<span><svg width="14" height="14"><rect width="14" height="14" rx="2" fill="var(--openai)" opacity=".5"/></svg>Estimated (*) · numbers under bars are AA scores</span>`;
     $("#effortSum").innerHTML = LADDER.efforts.map((e) => {
-      const [a, b] = LADDER.models.map((id) => pick(id, e));
-      if (!a || !b) return "";
-      const w = a.tasks >= b.tasks ? [a, b] : [b, a];
-      return `<li><strong>${e}:</strong> ${w[0].m.short} finishes <strong>${(w[0].tasks / w[1].tasks).toFixed(2)}×</strong> as many tasks (index ${w[0].ii} vs ${w[1].ii}).</li>`;
+      const set = LADDER.models.map((id) => pick(id, e)).filter(Boolean);
+      if (!set.length) return "";
+      const sol = set.find((r) => r.m.id === "gpt-6-1-sol");
+      const parts = set.map((r) => `${r.m.short} ${fmt(r.tasks)} <span style="color:var(--ink-3)">(${r.ii}${r.v.est ? " est." : ""})</span>`).join(" · ");
+      const vs = sol ? set.filter((r) => r !== sol && r.tasks > 0 && sol.tasks > 0).map((r) => `${r.m.short} ${(r.tasks / sol.tasks).toFixed(r.tasks / sol.tasks >= 10 ? 0 : 2)}×`).join(", ") : "";
+      return `<li><strong>${e}:</strong> ${parts}${vs ? ` <span style="color:var(--ink-2)">— vs GPT-6.1 Sol: ${vs}</span>` : ""}</li>`;
     }).join("");
   }
 

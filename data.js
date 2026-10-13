@@ -55,6 +55,19 @@ window.WSIWI_MODELS = [
     ],
   },
   {
+    // Released 2026-10-07. $0.10 / $0.50 per 1M tokens for prompts up to 100K tokens
+    // ($0.50 / $2.50 above that), billed against Claude Max limits at the same API rate.
+    id: "claude-haiku-5-5", name: "Claude Haiku 5.5", short: "Haiku 5.5", sub: "claude",
+    shape: "triangle", price: { in: 0.1, out: 0.5 },
+    variants: [
+      { effort: "low",    ii: 29, cost: 0.02, speed: null, src: AA + "claude-haiku-5-5-low" },
+      { effort: "medium", ii: 34, cost: 0.05, speed: null, src: AA + "claude-haiku-5-5-medium" },
+      { effort: "high",   ii: 38, cost: 0.08, speed: null, src: AA + "claude-haiku-5-5-high" },
+      { effort: "xhigh",  ii: 41, cost: 0.12, speed: null, src: AA + "claude-haiku-5-5-xhigh" },
+      { effort: "max",    ii: 43, cost: 0.21, speed: null, src: AA + "claude-haiku-5-5" },
+    ],
+  },
+  {
     id: "claude-fable-5-1", name: "Claude Fable 5.1", short: "Fable 5.1", sub: "claude",
     shape: "diamond", price: { in: 10, out: 50 },
     variants: [
