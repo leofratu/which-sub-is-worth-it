@@ -17,7 +17,7 @@ Open `index.html` in a browser, or serve the folder with GitHub Pages. There is 
 
 | Plan | Weekly API value (estimate) | Models |
 |---|---|---|
-| Claude Max 20x | ~$10,000 | Claude Opus 5.5, Claude Sonnet 5.5 at full value. Claude Fable 5.1 at the same rate, but it can use only 50% of the weekly limits (~$5,000). |
+| Claude Max 20x | ~$10,000 | Claude Opus 5.5, Sonnet 5.5 and Haiku 5.5 at full value. Claude Fable 5.1 at the same rate, but it can use only 50% of the weekly limits (~$5,000). |
 | OpenAI Pro 20x | ~$1,000 on GPT-6 Sol and GPT-6.1 Sol (same pricing), ~$1,400 on GPT-6 Astra at full limits. The limit-cut switch shows the same week at 50% (adjustable). | Limits are weighted differently per model. |
 
 Each model is tracked at low, medium, high, xhigh and max effort. For each one the page records the AA Intelligence Index (v4.3.2), cost per task, output speed and list price.
@@ -27,7 +27,7 @@ Each model is tracked at low, medium, high, xhigh and max effort. For each one t
 - **Sticky control bar.** Section navigation that tracks where you are, a live Claude vs. OpenAI scoreboard, a quality-bar slider that works from anywhere on the page, and a light/dark toggle.
 - **Scenarios.** One-click presets (Volume first, Balanced, Hard problems, Long agent runs), each showing its current winner.
 - **Quality-bar meter + week at a glance.** Pick a minimum Intelligence Index and see which plan finishes more tasks. A unit chart shows a week of work as squares that animate as you change settings. Pick a minimum Intelligence Index and see which plan finishes more tasks, and with which model and effort.
-- **Usage at each reasoning effort.** A grouped bar chart of tasks/week for Opus 5.5 vs GPT-6.1 Sol at low, medium, high and xhigh, with the lead at each effort.
+- **Usage at each reasoning effort.** A grouped bar chart (log scale) of tasks/week for Haiku 5.5, Opus 5.5 and GPT-6.1 Sol at low, medium, high and xhigh, with each Claude model's lead over 6.1 Sol.
 - **Before / after the OpenAI limit cut.** A switch that recomputes the whole page with full or cut OpenAI limits, a slider for the cut size, winner strips for both states, and a table of flipped scores.
 - **Your assumptions.** Sliders with exact-entry boxes for each plan's weekly value, the Fable limit cap and your task size (how many AA tasks one of your tasks is worth). Toggle models in or out and reset to defaults. Settings are remembered in your browser.
 - **Intelligence vs. tasks/week scatter.** Each model's effort curve, with the Pareto frontier ringed. Click a legend entry to hide a model. Points glide to new positions as you change assumptions. Click a point to pin its details, set it as your bar, or send it to the head-to-head.
@@ -40,18 +40,19 @@ Code: `index.html` (layout and styles), `app.js` (rendering and interaction), `d
 
 ## Headline (snapshot 2026-10-13): Claude Max 20x at ~$10,000/week vs GPT-6.1 Sol at ~$1,000/week
 
-Tasks finished per week if you run one effort level all week (Artificial Analysis cost per task):
+Tasks finished per week if you run one model at one effort level all week (Artificial Analysis cost per task; AA score in brackets):
 
-| Effort | Claude Opus 5.5 | GPT-6.1 Sol | Lead |
+| Effort | Claude Haiku 5.5 | Claude Opus 5.5 | GPT-6.1 Sol |
 |---|---|---|---|
-| low | 18,182 (index 42) | 7,692 (index 34) | Opus 2.36× |
-| medium | 7,463 (index 51) | 4,762 (index 44, estimated) | Opus 1.57× |
-| high | 5,495 (index 54) | 3,448 (index 49, estimated) | Opus 1.59× |
-| xhigh | 2,890 (index 56) | 2,564 (index 51) | Opus 1.13× |
+| low | 500,000 (29) | 18,182 (42) | 7,692 (34) |
+| medium | 200,000 (34) | 7,463 (51) | 4,762 (44, est.) |
+| high | 125,000 (38) | 5,495 (54) | 3,448 (49, est.) |
+| xhigh | 83,333 (41) | 2,890 (56) | 2,564 (51) |
 
-- At these values, Claude Max 20x finishes more tasks at every quality bar from 34 to 58, and at a higher score at every effort level.
+- Claude Haiku 5.5 (released 2026-10-07, $0.10 / $0.50 per 1M tokens) costs $0.02–0.21 per AA task. Every Haiku effort level is on the frontier. At the same score of 34, Haiku medium finishes ~26× as many tasks as GPT-6.1 Sol low.
+- At these values, Claude Max 20x finishes more tasks at every quality bar from 28 to 58. Haiku covers 28–43, and Opus 5.5 covers everything above.
 - At equal quality (index 51), Opus 5.5 medium finishes ~7,463 tasks/week against GPT-6.1 Sol xhigh's ~2,564, a lead of 2.9×.
-- GPT-6.1 Sol is still the cheapest per task ($0.39 at xhigh vs $1.34 for Opus medium). The 10× gap in weekly value is what decides it.
+- Haiku 5.5's price is 5× higher above 100K-token prompts, which these AA averages don't reflect for long-context work.
 - GPT-6.1 Sol medium and high are not yet published by Artificial Analysis. They are estimated by averaging along the published curve and marked "est." on the page.
 
 ## Contributing
