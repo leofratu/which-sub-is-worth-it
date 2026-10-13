@@ -38,7 +38,7 @@
       mix: { claude: { main: "claude-opus-5-5|medium", hard: "claude-opus-5-5|xhigh", h: 30 }, openai: { main: "gpt-6-astra|medium", hard: "gpt-6-astra|max", h: 30 } } },
   ];
 
-  const STORE = "wsiwi-state-v7";
+  const STORE = "wsiwi-state-v8";
   let state = structuredClone(DEFAULTS);
   try {
     const saved = JSON.parse(localStorage.getItem(STORE) || "null");
@@ -134,7 +134,7 @@
   // ---------- tooltip ----------
   const tip = $("#tip");
   function showTip(e, r, hint) {
-    tip.innerHTML = `<b>${r.m.name} · ${r.v.effort}</b><br>${r.subName}<br>
+    tip.innerHTML = `<b>${r.m.name} · ${r.v.effort}${r.v.est ? " (estimated)" : ""}</b><br>${r.subName}<br>
       <span class="mono">Index ${r.ii} · ${money(r.cost)}/task<br>${fmt(r.tasks)} tasks/wk · ${r.speed ?? "—"} tok/s</span>${hint ? `<br><span style="opacity:.7">${hint}</span>` : ""}`;
     tip.style.opacity = 1; moveTip(e);
   }
@@ -644,7 +644,7 @@
     $("#ledger tbody").innerHTML = sorted.map((r) => `
       <tr data-key="${r.key}" class="${r.use ? "" : "off"}">
         <td class="n">${r.use ? ++rank : ""}</td>
-        <td><span class="dot" style="background:${subColor(r.sub)}"></span><a href="${r.v.src}" target="_blank" rel="noopener">${r.m.name}</a> · ${r.v.effort}${r.frontier && r.use ? ' <span class="pill" title="No other option is at least as smart and finishes more tasks">Frontier</span>' : ""}</td>
+        <td><span class="dot" style="background:${subColor(r.sub)}"></span><a href="${r.v.src}" target="_blank" rel="noopener">${r.m.name}</a> · ${r.v.effort}${r.v.est ? ' <span class="est" title="Estimated: not yet published by Artificial Analysis">est.</span>' : ""}${r.frontier && r.use ? ' <span class="pill" title="No other option is at least as smart and finishes more tasks">Frontier</span>' : ""}</td>
         <td>${r.subName}</td>
         <td class="n">${r.ii ?? "—"}</td>
         <td class="n">${money(r.cost)}</td>
@@ -669,9 +669,9 @@
 
   // ---------- assumptions ----------
   const FIELDS = [
-    { k: "claude", r: "#rClaude", n: "#nClaude", max: 5000 },
+    { k: "claude", r: "#rClaude", n: "#nClaude", max: 30000 },
     { k: "fable", r: "#rFable", n: "#nFable", max: 100 },
-    { k: "sol", r: "#rSol", n: "#nSol", max: 5000 },
+    { k: "sol", r: "#rSol", n: "#nSol", max: 30000 },
     { k: "astra", r: "#rAstra", n: "#nAstra", max: 5000 },
   ];
   function syncInputs() {
@@ -761,9 +761,62 @@
   });
   $("#cutPct").addEventListener("input", (e) => { state.cutPct = +e.target.value; save(); render(); });
 
+  // ---------- effort ladder: Opus 5.5 vs GPT-6.1 Sol ----------
+  const LADDER = { efforts: ["low", "medium", "high", "xhigh"], models: ["claude-opus-5-5", "gpt-6-1-sol"] };
+  function drawEffort(rs) {
+    const W = 1080, H = 400, L = 64, R = 20, T = 34, B = 64;
+    const pick = (id, e) => rs.find((r) => r.m.id === id && r.v.effort === e && r.ok);
+    const all = LADDER.efforts.flatMap((e) => LADDER.models.map((id) => pick(id, e))).filter(Boolean);
+    const maxT = Math.max(1, ...all.map((r) => r.tasks));
+    // round the axis top up to a 1-2-5 step
+    const step = [1, 2, 2.5, 5].map((m) => m * 10 ** Math.floor(Math.log10(maxT / 4))).find((s) => s * 5 >= maxT) || 10 ** Math.ceil(Math.log10(maxT / 4));
+    const top = Math.ceil(maxT / step) * step;
+    const y = linScale(0, top, H - B, T);
+    const svg = el("svg", { viewBox: `0 0 ${W} ${H}`, role: "img", "aria-label": "Tasks per week at each reasoning effort, Opus 5.5 versus GPT-6.1 Sol" });
+    const g = el("g", {}, svg);
+    for (let v = 0; v <= top + 1e-9; v += step) {
+      el("line", { x1: L, x2: W - R, y1: y(v), y2: y(v), stroke: v === 0 ? "var(--rule)" : "var(--grid)" }, g);
+      el("text", { x: L - 8, y: y(v) + 4, "text-anchor": "end" }, g).textContent = tk(Math.round(v));
+    }
+    el("text", { x: 14, y: T - 14, "text-anchor": "start" }, g).textContent = "Tasks finished per week";
+    const gw = (W - L - R) / LADDER.efforts.length, bw = Math.min(110, gw * 0.3), gap = 6;
+    LADDER.efforts.forEach((e, i) => {
+      const cx = L + gw * i + gw / 2;
+      el("text", { class: "lbl", x: cx, y: H - B + 42, "text-anchor": "middle" }, g).textContent = e;
+      const pair = LADDER.models.map((id) => pick(id, e));
+      pair.forEach((r, j) => {
+        if (!r) return;
+        const x0 = cx + (j === 0 ? -bw - gap / 2 : gap / 2), y0 = y(r.tasks), h = Math.max(1, y(0) - y0);
+        const grp = el("g", { style: "cursor:default" }, svg);
+        el("path", { d: `M${x0},${y(0)}V${y0 + 4}Q${x0},${y0} ${x0 + 4},${y0}H${x0 + bw - 4}Q${x0 + bw},${y0} ${x0 + bw},${y0 + 4}V${y(0)}Z`, fill: subColor(r.sub), opacity: r.v.est ? .5 : 1 }, grp);
+        if (r.v.est) el("rect", { x: x0, y: y0, width: bw, height: h, fill: "url(#hatch)" }, grp);
+        el("text", { class: "lbl", x: x0 + bw / 2, y: y0 - 8, "text-anchor": "middle" }, grp).textContent = fmt(r.tasks);
+        el("text", { x: x0 + bw / 2, y: H - B + 18, "text-anchor": "middle" }, grp).textContent = `idx ${r.ii}${r.v.est ? " est." : ""}`;
+        el("rect", { x: x0, y: T, width: bw, height: y(0) - T, fill: "transparent" }, grp);
+        grp.addEventListener("mouseenter", (ev) => showTip(ev, r, `${money(r.cost)} per task`));
+        grp.addEventListener("mousemove", moveTip);
+        grp.addEventListener("mouseleave", hideTip);
+      });
+    });
+    const defs = el("defs", {}, svg);
+    const pat = el("pattern", { id: "hatch", width: 6, height: 6, patternUnits: "userSpaceOnUse", patternTransform: "rotate(45)" }, defs);
+    el("line", { x1: 0, y1: 0, x2: 0, y2: 6, stroke: "var(--panel)", "stroke-width": 2 }, pat);
+    $("#effortChart").replaceChildren(svg);
+    $("#effortLegend").innerHTML = LADDER.models.map((id) => {
+      const m = MODELS.find((x) => x.id === id);
+      return `<span><svg width="14" height="14"><rect width="14" height="14" rx="2" fill="${subColor(m.sub)}"/></svg>${m.name} · $${fmt(weekValue(m))}/week</span>`;
+    }).join("") + `<span><svg width="14" height="14"><rect width="14" height="14" rx="2" fill="var(--openai)" opacity=".5"/></svg>Estimated (not yet on AA)</span>`;
+    $("#effortSum").innerHTML = LADDER.efforts.map((e) => {
+      const [a, b] = LADDER.models.map((id) => pick(id, e));
+      if (!a || !b) return "";
+      const w = a.tasks >= b.tasks ? [a, b] : [b, a];
+      return `<li><strong>${e}:</strong> ${w[0].m.short} finishes <strong>${(w[0].tasks / w[1].tasks).toFixed(2)}×</strong> as many tasks (index ${w[0].ii} vs ${w[1].ii}).</li>`;
+    }).join("");
+  }
+
   function render() {
     const rs = rows();
-    drawChips(); drawPresets(rs); drawVerdict(rs); drawChange(); drawScatter(rs); drawPin(rs); drawCurve(rs); drawMix(); drawCmp(rs); drawTable(rs);
+    drawChips(); drawPresets(rs); drawVerdict(rs); drawEffort(rs); drawChange(); drawScatter(rs); drawPin(rs); drawCurve(rs); drawMix(); drawCmp(rs); drawTable(rs);
   }
 
   // ---------- wiring ----------
