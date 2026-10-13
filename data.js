@@ -6,7 +6,7 @@
 // speed = AA median output tokens/second. null = not published / not found.
 // Snapshot taken 2026-09-29. Please open a PR with a source link if a value moves.
 
-window.WSIWI_UPDATED = "2026-09-29";
+window.WSIWI_UPDATED = "2026-10-13";
 
 // Weekly API-dollar value each subscription delivers at full usage.
 // These are community estimates, not vendor figures. Adjustable on the page.
@@ -14,15 +14,15 @@ window.WSIWI_SUBS = {
   claude: {
     name: "Claude Max 20x",
     vendor: "Anthropic",
-    weeklyValue: 2250,        // ~$2,200–2,300 / week of API value across Opus 5.5 and Sonnet 5.5
-    weeklyRange: [2200, 2300],
+    weeklyValue: 10000,       // ~$10,000 / week of API value across Opus 5.5 and Sonnet 5.5 (user estimate, Oct 2026)
+    weeklyRange: [9000, 11000],
     fableShare: 0.5,          // Fable 5.1 bills at the same rate but may only use 50% of weekly limits
   },
   openai: {
     name: "OpenAI Pro 20x",
     vendor: "OpenAI",
     // Different models draw on limits with different weights, so value differs per model.
-    weeklyValueByModel: { "gpt-6-sol": 1300, "gpt-6-1-sol": 1300, "gpt-6-astra": 1400 },
+    weeklyValueByModel: { "gpt-6-sol": 1000, "gpt-6-1-sol": 1000, "gpt-6-astra": 1400 },  // Sol: ~$1,000 / week (user estimate, Oct 2026)
     // Limit-cut scenario: share of the weekly limit left after the cut (0.5 = cut in half).
     // The page compares before (full limits) and after (these values × cutScale).
     cutScale: 0.5,
@@ -78,13 +78,15 @@ window.WSIWI_MODELS = [
   },
   {
     // Same $2/$10 pricing as GPT-6 Sol, so it shares Sol's weekly value.
-    // AA has published low, xhigh and max; medium and high are pending.
+    // AA has published low, xhigh and max. Medium and high are estimated (est: true) by
+    // averaging along the published curve, using GPT-6 Sol's effort-ladder shape:
+    // medium sits 30% of the way from low to xhigh in cost and 60% in score, high 60% / 90%.
     id: "gpt-6-1-sol", name: "GPT-6.1 Sol", short: "GPT-6.1 Sol", sub: "openai",
     shape: "diamond", price: { in: 2, out: 10 },
     variants: [
       { effort: "low",    ii: 34,   cost: 0.13, speed: 74,   src: AA + "gpt-6-1-sol-low" },
-      { effort: "medium", ii: null, cost: null, speed: null, src: AA + "gpt-6-1-sol-medium" },
-      { effort: "high",   ii: null, cost: null, speed: null, src: AA + "gpt-6-1-sol-high" },
+      { effort: "medium", ii: 44,   cost: 0.21, speed: null, est: true, src: AA + "gpt-6-1-sol-medium" },
+      { effort: "high",   ii: 49,   cost: 0.29, speed: null, est: true, src: AA + "gpt-6-1-sol-high" },
       { effort: "xhigh",  ii: 51,   cost: 0.39, speed: null, src: AA + "gpt-6-1-sol-xhigh" },
       { effort: "max",    ii: 52,   cost: 0.72, speed: null, src: AA + "gpt-6-1-sol" },
     ],
