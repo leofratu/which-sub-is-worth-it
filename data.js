@@ -14,7 +14,8 @@ window.WSIWI_SUBS = {
   claude: {
     name: "Claude Max 20x",
     vendor: "Anthropic",
-    weeklyValue: 10000,       // Illustrative estimate adjustable in the app
+    weeklyValue: 10000,       // Sonnet and Haiku estimate
+    opusWeeklyValue: 2500,   // Opus 5.5 estimate
     weeklyRange: [9000, 11000],
     fableShare: 0.5,          // Fable 5.1 bills at the same rate but may only use 50% of weekly limits
   },
