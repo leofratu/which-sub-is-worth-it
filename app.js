@@ -20,6 +20,7 @@
   };
   const DEFAULTS = {
     claude: SUBS.claude.weeklyValue,
+    opus: SUBS.claude.opusWeeklyValue,
     fable: SUBS.claude.fableShare * 100,
     sol: SUBS.openai.weeklyValueByModel["gpt-6-sol"],
     astra: SUBS.openai.weeklyValueByModel["gpt-6-astra"],
@@ -37,7 +38,7 @@
       mix: { claude: { main: "claude-opus-5-5|medium", hard: "claude-opus-5-5|xhigh", h: 30 }, openai: { main: "gpt-6-astra|medium", hard: "gpt-6-astra|max", h: 30 } } },
   ];
 
-  const STORE = "wsiwi-state-v11";
+  const STORE = "wsiwi-state-v12";
   let state = structuredClone(DEFAULTS);
   try {
     const saved = JSON.parse(localStorage.getItem(STORE) || "null");
@@ -100,7 +101,7 @@
   // ---------- model economics ----------
   // Full-week $ value if the whole limit went to this model, and the share of the limit it may use.
   function weekValue(m) {
-    if (m.sub === "claude") return state.claude;
+    if (m.sub === "claude") return m.id === "claude-opus-5-5" ? state.opus : state.claude;
     return m.id === "gpt-6-astra" ? state.astra : state.sol;
   }
   const limitCap = (m) => m.id === "claude-fable-5-1" ? state.fable / 100 : 1;
@@ -669,6 +670,7 @@
   // ---------- assumptions ----------
   const FIELDS = [
     { k: "claude", r: "#rClaude", n: "#nClaude", max: 30000 },
+    { k: "opus", r: "#rOpus", n: "#nOpus", max: 30000 },
     { k: "fable", r: "#rFable", n: "#nFable", max: 100 },
     { k: "sol", r: "#rSol", n: "#nSol", max: 30000 },
     { k: "astra", r: "#rAstra", n: "#nAstra", max: 5000 },
