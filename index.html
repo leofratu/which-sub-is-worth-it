@@ -298,7 +298,7 @@ footer { margin-top: 48px; padding-top: 18px; border-top: 1px solid var(--rule);
     <nav class="nav" aria-label="Sections">
       <a href="#verdict">Verdict</a>
       <a href="#effort">Effort</a>
-      <a href="#change">Limit cut</a>
+      <a href="#change">All thresholds</a>
       <a href="#assumptions">Assumptions</a>
       <a href="#chart">Chart</a>
       <a href="#crossover">Crossover</a>
@@ -307,7 +307,7 @@ footer { margin-top: 48px; padding-top: 18px; border-top: 1px solid var(--rule);
       <a href="#rank">Ranking</a>
     </nav>
     <div class="score" id="score" aria-hidden="true"></div>
-    <div class="minibar-ctl"><label for="bar2">Bar</label><input type="range" id="bar2" min="28" max="58" step="1" aria-label="Minimum Intelligence Index"><output id="bar2Out"></output></div>
+    <div class="minibar-ctl"><label for="bar2">Bar</label><input type="range" id="bar2" min="19" max="58" step="1" aria-label="Minimum Intelligence Index"><output id="bar2Out"></output></div>
     <button class="icon-btn" id="theme" type="button" aria-label="Switch color theme"></button>
   </div>
 </div>
@@ -325,7 +325,7 @@ footer { margin-top: 48px; padding-top: 18px; border-top: 1px solid var(--rule);
       <h2>Most tasks per week at your quality bar</h2>
       <label class="slider-wrap" for="bar">
         Minimum Intelligence Index
-        <input type="range" id="bar" min="28" max="58" step="1" value="48">
+        <input type="range" id="bar" min="19" max="58" step="1" value="48">
         <output id="barOut" for="bar">48</output>
       </label>
     </div>
@@ -337,7 +337,7 @@ footer { margin-top: 48px; padding-top: 18px; border-top: 1px solid var(--rule);
   <section id="effort">
     <div class="sec-head">
       <h2>Usage at each reasoning effort</h2>
-      <p>How many tasks a week each plan finishes if you run Claude Haiku 5.5, Claude Opus 5.5 or GPT-6.1 Sol at one effort level all week. Haiku and Opus both draw on the Claude Max limits. The scale is logarithmic because Haiku 5.5 finishes about 100× more tasks than Opus. GPT-6.1 Sol medium and high are estimates, averaged along its published low, xhigh and max points.</p>
+      <p>How many tasks a week each plan finishes if you run Claude Haiku 5.5, Claude Opus 5.5 or GPT-6.1 Sol at one effort level all week. Haiku and Opus both draw on the Claude Max limits. The scale is logarithmic. Scores and costs use Artificial Analysis Intelligence Index v5; weekly values are adjustable estimates. GPT-6 Sol is excluded until comparable v5 measurements are available.</p>
     </div>
     <div class="panel">
       <div class="legend" id="effortLegend"></div>
@@ -347,36 +347,17 @@ footer { margin-top: 48px; padding-top: 18px; border-top: 1px solid var(--rule);
   </section>
 
   <section id="change">
-    <div class="sec-head">
-      <h2>Before and after the OpenAI limit cut</h2>
-      <p>What happens if OpenAI cuts Pro 20x limits? Flip the switch to recompute the whole page with or without the cut. Every model is included, GPT-6.1 Sol too. Each strip shows which plan finishes more tasks at every minimum score. Faded squares mean the lead is under 10%. Hover a square for details.</p>
-    </div>
-    <div class="panel change">
-      <div class="cut-ctl">
-        <div class="seg" id="cutSeg" role="group" aria-label="Before or after the OpenAI limit cut">
-          <button type="button" data-cut="before">Before the cut</button>
-          <button type="button" data-cut="after" id="cutAfterLbl">After the cut</button>
-        </div>
-        <label class="slider-wrap" for="cutPct">Limits left after the cut
-          <input type="range" id="cutPct" min="10" max="90" step="5">
-          <output id="cutPctOut" for="cutPct"></output>
-        </label>
-      </div>
-      <p class="mix-note" id="cutHint"></p>
-      <div class="strips" id="strips"></div>
-      <div class="table-wrap">
-        <table class="delta" id="delta">
-          <thead><tr><th class="n">Min. index</th><th>Before the cut</th><th>After the cut</th><th></th></tr></thead>
-          <tbody></tbody>
-        </table>
-      </div>
-    </div>
+    <div class="sec-head"><h2>Compare every threshold</h2>
+      <p>Click a score to set the quality bar across the page. Adjust either plan’s estimated weekly value below.</p></div>
+    <div class="panel"><div class="table-wrap"><table id="thresholds">
+      <thead><tr><th>Minimum index</th><th>Claude best option</th><th>Tasks/week</th><th>OpenAI best option</th><th>Tasks/week</th><th>Lead</th></tr></thead><tbody></tbody>
+    </table></div></div>
   </section>
 
   <section id="assumptions">
     <div class="sec-head">
       <h2>Your assumptions</h2>
-      <p>What a full week of each plan is worth in list-price API dollars, how big your tasks are, and which models you would actually use. Every chart and rank on the page updates as you drag.</p>
+      <p>What a week of each plan is worth in list-price API dollars, how big your tasks are, and which models you would actually use. Every chart and rank on the page updates as you drag.</p>
     </div>
     <div class="panel assume">
       <div class="assume-grid">
@@ -384,7 +365,7 @@ footer { margin-top: 48px; padding-top: 18px; border-top: 1px solid var(--rule);
           <div class="field-head"><label for="rClaude">Claude Max 20x</label>
             <span class="field-val">$<input id="nClaude" type="number" min="0" max="30000" step="100" aria-label="Claude Max 20x dollars per week"></span></div>
           <input id="rClaude" type="range" min="1000" max="20000" step="100">
-          <small>$/week on Opus, Sonnet or Haiku 5.5. Estimate ~$10,000.</small>
+          <small>$/week on Opus, Sonnet or Haiku 5.5. Estimate: ~$10,000/week.</small>
         </div>
         <div class="field">
           <div class="field-head"><label for="rFable">Fable 5.1 limit cap</label>
@@ -396,13 +377,13 @@ footer { margin-top: 48px; padding-top: 18px; border-top: 1px solid var(--rule);
           <div class="field-head"><label for="rSol">OpenAI Pro 20x · Sol, 6.1 Sol</label>
             <span class="field-val">$<input id="nSol" type="number" min="0" max="30000" step="50" aria-label="OpenAI Pro dollars per week on GPT-6 Sol"></span></div>
           <input id="rSol" type="range" min="250" max="5000" step="50">
-          <small>$/week on GPT-6 Sol or GPT-6.1 Sol (same pricing).</small>
+          <small>Estimate: $500/week on GPT-6.1 Sol.</small>
         </div>
         <div class="field">
           <div class="field-head"><label for="rAstra">OpenAI Pro 20x · Astra</label>
             <span class="field-val">$<input id="nAstra" type="number" min="0" max="5000" step="50" aria-label="OpenAI Pro dollars per week on GPT-6 Astra"></span></div>
           <input id="rAstra" type="range" min="500" max="3000" step="50">
-          <small>$/week if the whole week goes to GPT-6 Astra.</small>
+          <small>Estimate: $700/week if the whole week goes to GPT-6 Astra.</small>
         </div>
         <div class="field">
           <div class="field-head"><label for="rSize">Your task size</label>
