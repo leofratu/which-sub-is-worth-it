@@ -10,7 +10,7 @@
   const clamp = (v, lo, hi) => Math.min(hi, Math.max(lo, v));
   const key = (m, v) => `${m.id}|${v.effort}`;
   const SIZES = [0.25, 0.5, 1, 2, 3, 5, 10, 20, 50];
-  const BAR_MIN = 28, BAR_MAX = 58;
+  const BAR_MIN = 19, BAR_MAX = 58;
   const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
   const PLANS = ["claude", "openai"];
 
@@ -23,14 +23,13 @@
     fable: SUBS.claude.fableShare * 100,
     sol: SUBS.openai.weeklyValueByModel["gpt-6-sol"],
     astra: SUBS.openai.weeklyValueByModel["gpt-6-astra"],
-    cut: "before", cutPct: SUBS.openai.cutScale * 100,
     size: 2, hidden: [], bar: 48, preset: "balanced",
     mix: DEFAULT_MIX,
     cmp: { a: "claude-opus-5-5|medium", b: "gpt-6-1-sol|xhigh" },
   };
   const PRESETS = [
     { id: "volume", name: "Volume first", desc: "Lots of small, routine tasks", bar: 36, size: 2,
-      mix: { claude: { main: "claude-sonnet-5-5|low", hard: "claude-sonnet-5-5|high", h: 10 }, openai: { main: "gpt-6-sol|low", hard: "gpt-6-sol|high", h: 10 } } },
+      mix: { claude: { main: "claude-sonnet-5-5|low", hard: "claude-sonnet-5-5|high", h: 10 }, openai: { main: "gpt-6-1-sol|low", hard: "gpt-6-1-sol|high", h: 10 } } },
     { id: "balanced", name: "Balanced", desc: "Solid quality for most weeks", bar: 48, size: 2, mix: DEFAULT_MIX },
     { id: "hard", name: "Hard problems", desc: "Frontier-level reasoning only", bar: 54, size: 2,
       mix: { claude: { main: "claude-opus-5-5|high", hard: "claude-opus-5-5|max", h: 40 }, openai: { main: "gpt-6-astra|high", hard: "gpt-6-astra|max", h: 40 } } },
@@ -38,7 +37,7 @@
       mix: { claude: { main: "claude-opus-5-5|medium", hard: "claude-opus-5-5|xhigh", h: 30 }, openai: { main: "gpt-6-astra|medium", hard: "gpt-6-astra|max", h: 30 } } },
   ];
 
-  const STORE = "wsiwi-state-v9";
+  const STORE = "wsiwi-state-v11";
   let state = structuredClone(DEFAULTS);
   try {
     const saved = JSON.parse(localStorage.getItem(STORE) || "null");
@@ -100,19 +99,18 @@
 
   // ---------- model economics ----------
   // Full-week $ value if the whole limit went to this model, and the share of the limit it may use.
-  // `cut` picks the OpenAI limit state: "before" = full limits, "after" = cutPct% of them.
-  function weekValue(m, cut = state.cut) {
+  function weekValue(m) {
     if (m.sub === "claude") return state.claude;
-    return (m.id === "gpt-6-astra" ? state.astra : state.sol) * (cut === "after" ? state.cutPct / 100 : 1);
+    return m.id === "gpt-6-astra" ? state.astra : state.sol;
   }
   const limitCap = (m) => m.id === "claude-fable-5-1" ? state.fable / 100 : 1;
   const size = () => SIZES[state.size];
 
-  function rows(cut = state.cut) {
+  function rows() {
     const hidden = new Set(state.hidden);
     const out = [];
     MODELS.forEach((m) => m.variants.forEach((v) => {
-      const b = weekValue(m, cut) * limitCap(m);
+      const b = weekValue(m) * limitCap(m);
       const ok = v.ii != null && v.cost != null;
       const use = ok && b > 0 && !hidden.has(m.id);
       out.push({
@@ -230,10 +228,10 @@
   function drawScatter(rs) {
     const W = 1080, H = 460, L = 52, R = 24, T = 16, B = 44;
     const D = logDomain(rs);
-    const x = logScale(D.lo, D.hi, L + 90, W - R), y = linScale(25, 60, H - B, T);
+    const x = logScale(D.lo, D.hi, L + 90, W - R), y = linScale(15, 60, H - B, T);
     const svg = el("svg", { viewBox: `0 0 ${W} ${H}`, role: "img", "aria-label": "Scatter of intelligence index versus tasks per week" });
     const grid = el("g", {}, svg);
-    for (let v = 25; v <= 60; v += 5) {
+    for (let v = 15; v <= 60; v += 5) {
       el("line", { x1: L, x2: W - R, y1: y(v), y2: y(v), stroke: "var(--grid)" }, grid);
       el("text", { x: L - 8, y: y(v) + 4, "text-anchor": "end" }, grid).textContent = v;
     }
@@ -454,7 +452,7 @@
       const r = c || o;
       line = `At index ${bar} or higher, only <strong>${r.subName}</strong> has a model that qualifies: ${r.m.name} at ${r.v.effort} effort.`;
     } else line = `No selected model reaches index ${bar}.`;
-    $("#verdictLine").innerHTML = (state.cut === "after" ? `<span class="pill" style="margin:0 8px 0 0">After cut · ${Math.round(state.cutPct)}% limits</span>` : "") + line;
+    $("#verdictLine").innerHTML = line;
     $("#barOut").textContent = bar; $("#bar").value = bar;
     $("#bar2Out").textContent = bar; $("#bar2").value = bar;
 
@@ -493,7 +491,7 @@
     const v = clamp(Math.round(b), BAR_MIN, BAR_MAX);
     if (v === state.bar && !announce) return;
     state.bar = v; manual(); save();
-    const rs = rows(); drawVerdict(rs); drawScatter(rs); drawCurve(rs); drawPresets(rs);
+    const rs = rows(); drawVerdict(rs); drawScatter(rs); drawCurve(rs); drawPresets(rs); drawChange(rs);
     if (announce) { toast(`Quality bar set to ${v}`); flash($("#verdict")); }
   }
 
@@ -721,46 +719,23 @@
     navLinks.forEach((a) => { const s = document.querySelector(a.getAttribute("href")); if (s) io.observe(s); });
   }
 
-  // ---------- before / after GPT-6.1 Sol ----------
-  const winnerAt = (rs, b) => {
-    const c = bestAt(rs, "claude", b), o = bestAt(rs, "openai", b);
-    if (!c && !o) return null;
-    const w = c && o ? (c.tasks >= o.tasks ? c : o) : c || o, l = w === c ? o : c;
-    return { sub: w.sub, w, l, ratio: l ? w.tasks / l.tasks : null };
-  };
-  function drawChange() {
-    const eras = { before: rows("before"), after: rows("after") };
-    const pct = Math.round(state.cutPct);
-    $$("#cutSeg button").forEach((b) => b.setAttribute("aria-pressed", String(b.dataset.cut === state.cut)));
-    $("#cutAfterLbl").textContent = `After the cut (${pct}%)`;
-    $("#cutPct").value = state.cutPct; $("#cutPctOut").textContent = pct + "%";
-    $("#cutHint").textContent = `OpenAI Pro 20x after the cut: $${fmt(state.sol * pct / 100)}/week on Sol and 6.1 Sol, $${fmt(state.astra * pct / 100)} on Astra.`;
-    const strip = (era) => {
-      let cells = "";
-      for (let b = BAR_MIN; b <= BAR_MAX; b++) {
-        const w = winnerAt(eras[era], b);
-        const t = w ? `Index ${b}: ${w.w.subName} via ${w.w.label}${w.ratio ? `, ${w.ratio.toFixed(2)}×` : ""}` : `Index ${b}: no model`;
-        cells += `<i title="${t}" style="background:${w ? subColor(w.sub) : "var(--grid)"};opacity:${w && w.ratio && w.ratio < 1.1 ? .55 : 1}"></i>`;
-      }
-      return `<div class="strip-row${state.cut === era ? " cur" : ""}"><span>${era === "before" ? "Before the cut" : `After the cut (${pct}%)`}</span><div class="strip" style="grid-template-columns:repeat(${BAR_MAX - BAR_MIN + 1},1fr)">${cells}</div></div>`;
-    };
-    let ticks = "";
-    for (let b = BAR_MIN; b <= BAR_MAX; b++) ticks += `<span>${b % 2 === 0 ? b : ""}</span>`;
-    $("#strips").innerHTML = strip("before") + strip("after") + `<div class="strip-row ticks"><span>Min. index</span><div class="strip" style="grid-template-columns:repeat(${BAR_MAX - BAR_MIN + 1},1fr)">${ticks}</div></div>`;
-    const cell = (w) => w ? `<span class="dot" style="background:${subColor(w.sub)}"></span>${w.w.subName}<small>${w.w.label} · ${fmt(w.w.tasks)}${w.ratio ? ` · ${w.ratio.toFixed(2)}×` : " · only option"}</small>` : "—";
-    $("#delta tbody").innerHTML = [30, 34, 40, 44, 48, 51, 52, 53, 56].map((b) => {
-      const B = winnerAt(eras.before, b), A = winnerAt(eras.after, b);
-      const flip = B && A && B.sub !== A.sub;
-      return `<tr><td class="n">${b}</td><td>${cell(B)}</td><td>${cell(A)}</td><td>${flip ? '<span class="pill">Flipped</span>' : ""}</td></tr>`;
-    }).join("");
+  // A complete threshold table, synchronized with the quality slider.
+  function drawChange(rs) {
+    const cell = (r) => r ? r.label : "—";
+    let html = "";
+    for (let b = BAR_MIN; b <= BAR_MAX; b++) {
+      const c = bestAt(rs, "claude", b), o = bestAt(rs, "openai", b);
+      let lead = "—";
+      if (c && o) { const w = c.tasks >= o.tasks ? c : o, l = w === c ? o : c; lead = `${w.subName} · ${(w.tasks / l.tasks).toFixed(1)}×`; }
+      else if (c || o) lead = (c || o).subName + " only";
+      html += `<tr><td><button type="button" data-threshold="${b}" aria-label="Set quality bar to ${b}">${b}${b === state.bar ? " ✓" : ""}</button></td><td>${cell(c)}</td><td>${c ? fmt(c.tasks) : "—"}</td><td>${cell(o)}</td><td>${o ? fmt(o.tasks) : "—"}</td><td>${lead}</td></tr>`;
+    }
+    $("#thresholds tbody").innerHTML = html;
   }
-  $("#cutSeg").addEventListener("click", (e) => {
-    const b = e.target.closest("[data-cut]");
-    if (!b || b.dataset.cut === state.cut) return;
-    state.cut = b.dataset.cut; save(); render();
-    toast(state.cut === "before" ? "Full OpenAI limits (before the cut)" : `OpenAI limits cut to ${Math.round(state.cutPct)}%`);
+  $("#thresholds").addEventListener("click", (e) => {
+    const b = e.target.closest("[data-threshold]");
+    if (b) setBar(+b.dataset.threshold, true);
   });
-  $("#cutPct").addEventListener("input", (e) => { state.cutPct = +e.target.value; save(); render(); });
 
   // ---------- effort ladder: Opus 5.5 vs GPT-6.1 Sol ----------
   const LADDER = { efforts: ["low", "medium", "high", "xhigh"], models: ["claude-haiku-5-5", "claude-opus-5-5", "gpt-6-1-sol"] };
@@ -810,7 +785,7 @@
       const m = MODELS.find((x) => x.id === id);
       const fill = id === "claude-haiku-5-5" ? "color-mix(in srgb, var(--claude) 50%, var(--panel))" : subColor(m.sub);
       return `<span><svg width="14" height="14"><rect width="14" height="14" rx="2" fill="${fill}"/></svg>${m.name} · $${fmt(weekValue(m))}/week</span>`;
-    }).join("") + `<span><svg width="14" height="14"><rect width="14" height="14" rx="2" fill="var(--openai)" opacity=".5"/></svg>Estimated (*) · numbers under bars are AA scores</span>`;
+    }).join("") + `<span><svg width="14" height="14"><rect width="14" height="14" rx="2" fill="var(--openai)" opacity=".5"/></svg>Numbers under bars are AA scores</span>`;
     $("#effortSum").innerHTML = LADDER.efforts.map((e) => {
       const set = LADDER.models.map((id) => pick(id, e)).filter(Boolean);
       if (!set.length) return "";
@@ -823,7 +798,7 @@
 
   function render() {
     const rs = rows();
-    drawChips(); drawPresets(rs); drawVerdict(rs); drawEffort(rs); drawChange(); drawScatter(rs); drawPin(rs); drawCurve(rs); drawMix(); drawCmp(rs); drawTable(rs);
+    drawChips(); drawPresets(rs); drawVerdict(rs); drawEffort(rs); drawChange(rs); drawScatter(rs); drawPin(rs); drawCurve(rs); drawMix(); drawCmp(rs); drawTable(rs);
   }
 
   // ---------- wiring ----------
