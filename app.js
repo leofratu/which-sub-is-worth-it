@@ -38,7 +38,7 @@
       mix: { claude: { main: "claude-opus-5-5|medium", hard: "claude-opus-5-5|xhigh", h: 30 }, openai: { main: "gpt-6-astra|medium", hard: "gpt-6-astra|max", h: 30 } } },
   ];
 
-  const STORE = "wsiwi-state-v12";
+  const STORE = "wsiwi-state-v13";
   let state = structuredClone(DEFAULTS);
   try {
     const saved = JSON.parse(localStorage.getItem(STORE) || "null");
