@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Which Sub Is Worth It?</title>
-<meta name="description" content="Open tracker comparing how many AI Intelligence Index tasks a Claude Max 20x or OpenAI Pro 20x subscription gets done per week, at every reasoning effort.">
+<meta name="description" content="Open tracker comparing how many AI Intelligence Index tasks a Claude Max or ChatGPT Pro subscription gets done per week, at every reasoning effort.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,400..800&family=JetBrains+Mono:wght@400;600&display=swap">
@@ -205,6 +205,10 @@ section { padding-block: 40px 0; }
 
 /* assumptions */
 .assume { display: grid; gap: 22px; }
+table.plans-ref { min-width: 620px; }
+table.plans-ref caption { caption-side: top; text-align: left; font-size: 13px; color: var(--ink-3); padding: 0 0 8px; }
+table.plans-ref td:first-child { font-weight: 600; color: var(--ink); }
+table.plans-ref td:last-child { white-space: normal; color: var(--ink-2); }
 .assume-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 290px), 1fr)); gap: 18px 22px; }
 .field-val input::-webkit-inner-spin-button, .field-val input::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
 .field { display: grid; grid-template-rows: auto auto auto; align-content: start; gap: 6px; font-size: 13px; color: var(--ink-2); min-width: 0; }
@@ -360,18 +364,30 @@ footer { margin-top: 48px; padding-top: 18px; border-top: 1px solid var(--rule);
       <p>What a week of each plan is worth in list-price API dollars, how big your tasks are, and which models you would actually use. Every chart and rank on the page updates as you drag.</p>
     </div>
     <div class="panel assume">
+      <div class="table-wrap">
+        <table class="plans-ref" aria-label="Weekly API equivalent of each plan">
+          <caption>Weekly API equivalent at full usage. Current, non-grandfathered plans unless marked.</caption>
+          <thead><tr><th>Plan</th><th class="n">Weekly API equivalent</th><th>Grandfathered?</th><th>Note</th></tr></thead>
+          <tbody>
+            <tr><td>Claude Max 20x</td><td class="n">$1,600–$2,500</td><td>No</td><td>Default on this page: $2,500</td></tr>
+            <tr><td>Claude Max 5x</td><td class="n">~$1,250</td><td>No</td><td>About half the 20x tier</td></tr>
+            <tr><td>ChatGPT Pro 10x ($200)</td><td class="n">~$600–$650</td><td>No</td><td>Current $200 tier</td></tr>
+            <tr><td>ChatGPT Pro legacy 20x ($200)</td><td class="n">~$1,262</td><td>Yes</td><td>Default on this page: $1,200 on Sol and 6.1 Sol</td></tr>
+          </tbody>
+        </table>
+      </div>
       <div class="assume-grid">
         <div class="field">
-          <div class="field-head"><label for="rClaude">Claude Max · Sonnet and Haiku</label>
+          <div class="field-head"><label for="rClaude">Claude Max 20x · Sonnet and Haiku</label>
             <span class="field-val">$<input id="nClaude" type="number" min="0" max="30000" step="100" aria-label="Claude Max 20x dollars per week"></span></div>
-          <input id="rClaude" type="range" min="1000" max="20000" step="100">
-          <small>$/week on Sonnet or Haiku. Estimate: ~$10,000/week.</small>
+          <input id="rClaude" type="range" min="250" max="5000" step="50">
+          <small>$/week on Sonnet or Haiku. Estimate: ~$2,500 (range $1,600–$2,500).</small>
         </div>
         <div class="field">
-          <div class="field-head"><label for="rOpus">Claude Max · Opus 5.5</label>
+          <div class="field-head"><label for="rOpus">Claude Max 20x · Opus 5.5</label>
             <span class="field-val">$<input id="nOpus" type="number" min="1" max="30000" step="100" aria-label="Opus 5.5 dollars per week"></span></div>
-          <input id="rOpus" type="range" min="100" max="20000" step="100">
-          <small>$/week on Opus 5.5. Estimate: $2,500/week.</small>
+          <input id="rOpus" type="range" min="250" max="5000" step="50">
+          <small>$/week on Opus 5.5. Estimate: ~$2,500, the same weekly plan value.</small>
         </div>
         <div class="field">
           <div class="field-head"><label for="rFable">Fable 5.1 limit cap</label>
@@ -380,16 +396,16 @@ footer { margin-top: 48px; padding-top: 18px; border-top: 1px solid var(--rule);
           <small id="fableHint"></small>
         </div>
         <div class="field">
-          <div class="field-head"><label for="rSol">OpenAI Pro 20x · Sol, 6.1 Sol</label>
-            <span class="field-val">$<input id="nSol" type="number" min="0" max="30000" step="50" aria-label="OpenAI Pro dollars per week on GPT-6 Sol"></span></div>
-          <input id="rSol" type="range" min="250" max="5000" step="50">
-          <small>Estimate: $500/week on GPT-6.1 Sol.</small>
+          <div class="field-head"><label for="rSol">ChatGPT Pro 20x · Sol, 6.1 Sol</label>
+            <span class="field-val">$<input id="nSol" type="number" min="0" max="30000" step="50" aria-label="ChatGPT Pro dollars per week on GPT-6 Sol"></span></div>
+          <input id="rSol" type="range" min="250" max="3000" step="50">
+          <small>Estimate: ~$1,200/week on GPT-6.1 Sol (legacy 20x; current 10x ~$600).</small>
         </div>
         <div class="field">
-          <div class="field-head"><label for="rAstra">OpenAI Pro 20x · Astra</label>
-            <span class="field-val">$<input id="nAstra" type="number" min="0" max="5000" step="50" aria-label="OpenAI Pro dollars per week on GPT-6 Astra"></span></div>
+          <div class="field-head"><label for="rAstra">ChatGPT Pro 20x · Astra</label>
+            <span class="field-val">$<input id="nAstra" type="number" min="0" max="5000" step="50" aria-label="ChatGPT Pro dollars per week on GPT-6 Astra"></span></div>
           <input id="rAstra" type="range" min="500" max="3000" step="50">
-          <small>Estimate: $700/week if the whole week goes to GPT-6 Astra.</small>
+          <small>Estimate: ~$1,400/week if the whole week goes to GPT-6 Astra.</small>
         </div>
         <div class="field">
           <div class="field-head"><label for="rSize">Your task size</label>
