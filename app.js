@@ -38,7 +38,7 @@
       mix: { claude: { main: "claude-opus-5-5|medium", hard: "claude-opus-5-5|xhigh", h: 30 }, openai: { main: "gpt-6-astra|medium", hard: "gpt-6-astra|max", h: 30 } } },
   ];
 
-  const STORE = "wsiwi-state-v9";
+  const STORE = "wsiwi-state-v10";
   let state = structuredClone(DEFAULTS);
   try {
     const saved = JSON.parse(localStorage.getItem(STORE) || "null");
@@ -734,7 +734,7 @@
     $$("#cutSeg button").forEach((b) => b.setAttribute("aria-pressed", String(b.dataset.cut === state.cut)));
     $("#cutAfterLbl").textContent = `After the cut (${pct}%)`;
     $("#cutPct").value = state.cutPct; $("#cutPctOut").textContent = pct + "%";
-    $("#cutHint").textContent = `OpenAI Pro 20x after the cut: $${fmt(state.sol * pct / 100)}/week on Sol and 6.1 Sol, $${fmt(state.astra * pct / 100)} on Astra.`;
+    $("#cutHint").textContent = `${SUBS.openai.name} limits at ${pct}%: $${fmt(state.sol * pct / 100)}/week on Sol and 6.1 Sol, $${fmt(state.astra * pct / 100)} on Astra. (100% = legacy 20x, 50% ≈ current 10x.)`;
     const strip = (era) => {
       let cells = "";
       for (let b = BAR_MIN; b <= BAR_MAX; b++) {
@@ -770,7 +770,7 @@
     const W = 1080, H = 400, L = 64, R = 20, T = 34, B = 64;
     const pick = (id, e) => rs.find((r) => r.m.id === id && r.v.effort === e && r.ok);
     const all = LADDER.efforts.flatMap((e) => LADDER.models.map((id) => pick(id, e))).filter(Boolean);
-    // Haiku finishes ~100× more tasks than Opus, so the axis is logarithmic (1-2-5 ticks).
+    // Haiku finishes ~27× more tasks than Opus, so the axis is logarithmic (1-2-5 ticks).
     const ts = all.map((r) => r.tasks).filter((t) => t > 0);
     const lo = 10 ** Math.floor(Math.log10(Math.min(...ts, 1e9) / 1.5)), hi = 10 ** Math.ceil(Math.log10(Math.max(...ts, 1) * 1.3));
     const y = logScale(lo, hi, H - B, T), base = y(lo);

@@ -6,25 +6,43 @@
 // speed = AA median output tokens/second. null = not published / not found.
 // Snapshot taken 2026-09-29. Please open a PR with a source link if a value moves.
 
-window.WSIWI_UPDATED = "2026-10-13";
+window.WSIWI_UPDATED = "2026-10-29";
 
-// Weekly API-dollar value each subscription delivers at full usage.
+// Every plan we track, with the weekly API-equivalent value it delivers at full usage.
+// Figures are community estimates for current, non-grandfathered plans unless the row says
+// otherwise. Only the `claude` and `openai` rows below feed the page; the rest are recorded
+// here as the reference for tier-to-tier comparisons (a 20x tier lands near 2x its 5x/10x tier).
+window.WSIWI_PLANS = [
+  { id: "claude-max-20x",        vendor: "Anthropic", name: "Claude Max 20x",                 weekly: 2500, range: [1600, 2500], grandfathered: false, page: "claude",
+    note: "Current plan. Whole week on Opus 5.5, Sonnet 5.5 or Haiku 5.5." },
+  { id: "claude-max-5x",         vendor: "Anthropic", name: "Claude Max 5x",                  weekly: 1250, range: [1250, 1250], grandfathered: false,
+    note: "Current plan. Half the 20x tiers' limits, matching ~2x scaling." },
+  { id: "chatgpt-pro-10x",       vendor: "OpenAI",    name: "ChatGPT Pro 10x ($200)",         weekly: 625,  range: [600, 650],   grandfathered: false,
+    note: "Current plan. Same $200 price as the legacy 20x, roughly half the value." },
+  { id: "chatgpt-pro-legacy-20x", vendor: "OpenAI",   name: "ChatGPT Pro legacy 20x ($200)",  weekly: 1262, range: [1262, 1262], grandfathered: true,
+    note: "Grandfathered: existing subscribers keep double the 10x limits at the same price." },
+];
+
+// Weekly API-dollar value each subscription delivers at full usage, as used by the page.
 // These are community estimates, not vendor figures. Adjustable on the page.
 window.WSIWI_SUBS = {
   claude: {
     name: "Claude Max 20x",
     vendor: "Anthropic",
-    weeklyValue: 10000,       // ~$10,000 / week of API value across Opus 5.5 and Sonnet 5.5 (user estimate, Oct 2026)
-    weeklyRange: [9000, 11000],
+    weeklyValue: 2500,        // ~$2,500 / week of API value across Opus 5.5, Sonnet 5.5 and Haiku 5.5 (estimate, Oct 2026)
+    weeklyRange: [1600, 2500],
     fableShare: 0.5,          // Fable 5.1 bills at the same rate but may only use 50% of weekly limits
   },
   openai: {
-    name: "OpenAI Pro 20x",
+    name: "ChatGPT Pro 20x",
     vendor: "OpenAI",
     // Different models draw on limits with different weights, so value differs per model.
-    weeklyValueByModel: { "gpt-6-sol": 1000, "gpt-6-1-sol": 1000, "gpt-6-astra": 1400 },  // Sol: ~$1,000 / week (user estimate, Oct 2026)
+    // Pro is modelled at the legacy 20x level (~$1,200 / week on Sol and 6.1 Sol), the higher of
+    // the two $200 tiers; the current 10x tier lands at half that via cutScale.
+    weeklyValueByModel: { "gpt-6-sol": 1200, "gpt-6-1-sol": 1200, "gpt-6-astra": 1400 },
     // Limit-cut scenario: share of the weekly limit left after the cut (0.5 = cut in half).
-    // The page compares before (full limits) and after (these values × cutScale).
+    // The page compares before (full limits) and after (these values × cutScale), i.e. the
+    // legacy 20x week vs the current 10x week (~$600-650 on Sol).
     cutScale: 0.5,
   },
 };
