@@ -15,10 +15,18 @@ Open `index.html` in a browser, or serve the folder with GitHub Pages. There is 
 
 ## What's tracked
 
-| Plan | Weekly API value (estimate) | Models |
-|---|---|---|
-| Claude Max 20x | ~$10,000 | Claude Opus 5.5, Sonnet 5.5 and Haiku 5.5 at full value. Claude Fable 5.1 at the same rate, but it can use only 50% of the weekly limits (~$5,000). |
-| OpenAI Pro 20x | ~$1,000 on GPT-6 Sol and GPT-6.1 Sol (same pricing), ~$1,400 on GPT-6 Astra at full limits. The limit-cut switch shows the same week at 50% (adjustable). | Limits are weighted differently per model. |
+Weekly API-equivalent value at full usage. Figures are community estimates for current,
+non-grandfathered plans unless the row says otherwise.
+
+| Plan | Weekly API value (estimate) | Grandfathered? | On the page |
+|---|---|---|---|
+| Claude Max 20x | $1,600–$2,500 (default **$2,500**) | No | Yes, the Claude budget. Runs Claude Opus 5.5, Sonnet 5.5 and Haiku 5.5 at full value; Claude Fable 5.1 bills at the same rate but can use only 50% of the weekly limits (~$1,250). |
+| Claude Max 5x | ~$1,250 | No | Reference tier only. Half the 20x limits, so halve every Claude number below. |
+| ChatGPT Pro 10x ($200) | ~$600–$650 | No | Yes, as the 50% position of the limit-cut switch. |
+| ChatGPT Pro legacy 20x ($200) | ~$1,262 (default **$1,200** on Sol and 6.1 Sol, $1,400 on Astra) | Yes | Yes, the OpenAI budget at 100% limits. |
+
+A 20x tier lands at roughly twice its vendor's 5x/10x tier, which is why the limit-cut switch
+defaults to 50%: it turns a legacy 20x week into a current 10x week.
 
 Each model is tracked at low, medium, high, xhigh and max effort. For each one the page records the AA Intelligence Index (v4.3.2), cost per task, output speed and list price.
 
@@ -38,20 +46,22 @@ Each model is tracked at low, medium, high, xhigh and max effort. For each one t
 
 Code: `index.html` (layout and styles), `app.js` (rendering and interaction), `data.js` (all numbers).
 
-## Headline (snapshot 2026-10-13): Claude Max 20x at ~$10,000/week vs GPT-6.1 Sol at ~$1,000/week
+## Headline (snapshot 2026-10-29): Claude Max 20x at ~$2,500/week vs ChatGPT Pro at ~$1,200/week (legacy 20x) or ~$600/week (current 10x)
 
 Tasks finished per week if you run one model at one effort level all week (Artificial Analysis cost per task; AA score in brackets):
 
 | Effort | Claude Haiku 5.5 | Claude Opus 5.5 | GPT-6.1 Sol |
 |---|---|---|---|
-| low | 500,000 (29) | 18,182 (42) | 7,692 (34) |
-| medium | 200,000 (34) | 7,463 (51) | 4,762 (44, est.) |
-| high | 125,000 (38) | 5,495 (54) | 3,448 (49, est.) |
-| xhigh | 83,333 (41) | 2,890 (56) | 2,564 (51) |
+| low | 125,000 (29) | 4,545 (42) | 9,231 (34) |
+| medium | 50,000 (34) | 1,866 (51) | 5,714 (44, est.) |
+| high | 31,250 (38) | 1,374 (54) | 4,138 (49, est.) |
+| xhigh | 20,833 (41) | 723 (56) | 3,077 (51) |
 
-- Claude Haiku 5.5 (released 2026-10-07, $0.10 / $0.50 per 1M tokens) costs $0.02–0.21 per AA task. Every Haiku effort level is on the frontier. At the same score of 34, Haiku medium finishes ~26× as many tasks as GPT-6.1 Sol low.
-- At these values, Claude Max 20x finishes more tasks at every quality bar from 28 to 58. Haiku covers 28–43, and Opus 5.5 covers everything above.
-- At equal quality (index 51), Opus 5.5 medium finishes ~7,463 tasks/week against GPT-6.1 Sol xhigh's ~2,564, a lead of 2.9×.
+- At a $2,500 Claude week against a $1,200 Pro week the plans split the range instead of one running the table: Claude leads from index 28 to 43 on Haiku 5.5 efficiency, OpenAI leads from 44 to 52 on GPT-6.1 Sol, and Claude takes 53 and above back with Opus 5.5.
+- At equal quality (index 51), GPT-6.1 Sol xhigh finishes ~3,077 tasks/week against Opus 5.5 medium's ~1,866, so OpenAI is ~1.65× ahead at the middle of the range.
+- At the low end Haiku 5.5 is untouchable: at index 36, Haiku high does ~31,250 tasks/week against Sol medium's ~5,714 (~5.5×). At the same score of 34, Haiku medium is ~5.4× Sol low.
+- Claude Haiku 5.5 (released 2026-10-07, $0.10 / $0.50 per 1M tokens) costs $0.02–0.21 per AA task, so every Haiku effort level sits on the frontier.
+- Dropping to Claude Max 5x (~$1,250) halves every Claude number; the current ChatGPT 10x tier (~$600) halves OpenAI's, and OpenAI then only holds index 44, 48 and 49.
 - Haiku 5.5's price is 5× higher above 100K-token prompts, which these AA averages don't reflect for long-context work.
 - GPT-6.1 Sol medium and high are not yet published by Artificial Analysis. They are estimated by averaging along the published curve and marked "est." on the page.
 
